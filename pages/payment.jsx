@@ -41,7 +41,6 @@ export default function Payment() {
   }, []);
 
   const handlePayment = () => {
-    // Validation
     if (!name.trim() || !email.trim() || !phone.trim()) {
       alert('Please fill in all your details.');
       return;
@@ -61,11 +60,9 @@ export default function Payment() {
 
     setLoading(true);
 
-    // Razorpay configuration
     const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
     if (!razorpayKey || razorpayKey.includes('XXXX')) {
-      // Demo mode — no real key configured yet
       setTimeout(() => {
         setLoading(false);
         alert(
@@ -77,7 +74,7 @@ export default function Payment() {
 
     const options = {
       key: razorpayKey,
-      amount: selectedPlan.price * 100, // paise
+      amount: selectedPlan.price * 100,
       currency: 'INR',
       name: 'SIDDHI',
       description: `${selectedPlan.name} — Communication AI`,
@@ -85,7 +82,6 @@ export default function Payment() {
       handler: function (response) {
         alert(`Payment successful! ID: ${response.razorpay_payment_id}`);
         setLoading(false);
-        // TODO: Send payment_id to backend for verification
       },
       prefill: {
         name: name,
@@ -194,12 +190,12 @@ export default function Payment() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Full name</label>
+                <label className="block text-sm font-semibold mb-1">Enter your name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="As on your ID"
+                  placeholder="Your full name"
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
               </div>

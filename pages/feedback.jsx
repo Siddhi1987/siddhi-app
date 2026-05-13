@@ -176,7 +176,7 @@ export default function Feedback() {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Parag"
+                placeholder="Enter your name"
                 className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
               />
             </div>
