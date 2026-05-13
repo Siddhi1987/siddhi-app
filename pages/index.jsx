@@ -103,14 +103,14 @@ export default function Home() {
           scrolled ? 'bg-siddhi-ivory/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-3xl font-bold text-siddhi-saffron tracking-tight">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-baseline gap-1 sm:gap-2 min-w-0">
+            <span className="font-display text-2xl sm:text-3xl font-bold text-siddhi-saffron tracking-tight">
               SIDDHI
             </span>
             <span className="font-sanskrit text-sm text-siddhi-gold hidden sm:inline">सिद्धि</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
             <a href="#features" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">
               Features
             </a>
@@ -119,7 +119,7 @@ export default function Home() {
             </a>
             <Link
               href="/interview"
-              className="px-5 py-2 bg-siddhi-saffron text-white text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm"
+              className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap"
             >
               Try Free
             </Link>
@@ -128,7 +128,7 @@ export default function Home() {
       </nav>
 
       {/* ============ HERO ============ */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-block mb-6 px-4 py-1.5 border border-siddhi-gold/40 rounded-full bg-white/50">
             <span className="font-sanskrit text-siddhi-gold text-lg">वाक् सिद्धि</span>
@@ -136,7 +136,7 @@ export default function Home() {
             <span className="text-xs uppercase tracking-widest text-siddhi-black/60">Mastery of Speech</span>
           </div>
 
-          <h1 className="font-display text-6xl md:text-8xl font-bold text-siddhi-black mb-6 leading-[1.05]">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-siddhi-black mb-6 leading-[1.1] md:leading-[1.05] break-words">
             India's first
             <br />
             <span className="text-siddhi-saffron italic">Communication AI</span>
@@ -150,16 +150,16 @@ export default function Home() {
             rooted in Indian heritage and built for the modern professional.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 max-w-md sm:max-w-none mx-auto">
             <Link
               href="/interview"
-              className="px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-lg"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center"
             >
               Start Free Interview Practice →
             </Link>
             <Link
               href="/payment"
-              className="px-8 py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-lg"
+              className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-base sm:text-lg text-center"
             >
               Upgrade to Pro
             </Link>
@@ -182,13 +182,13 @@ export default function Home() {
       </section>
 
       {/* ============ FEATURES (clickable) ============ */}
-      <section id="features" className="py-20 px-6 bg-white">
+      <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
               The SIDDHI Way
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Four pillars of mastery
             </h2>
             <p className="text-siddhi-black/60 max-w-2xl mx-auto">
@@ -241,13 +241,13 @@ export default function Home() {
       </section>
 
       {/* ============ WHY SIDDHI ============ */}
-      <section className="py-20 px-6 bg-siddhi-ivory">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
               Why SIDDHI
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
               Built for India, by an Indian.
             </h2>
             <div className="space-y-4 text-siddhi-black/75">
@@ -278,13 +278,13 @@ export default function Home() {
       </section>
 
       {/* ============ PRICING ============ */}
-      <section id="pricing" className="py-20 px-6 bg-white">
+      <section id="pricing" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
               Pricing
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Start free. Upgrade when ready.
             </h2>
           </div>
@@ -337,10 +337,10 @@ export default function Home() {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="py-24 px-6 bg-siddhi-black text-siddhi-ivory">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory">
         <div className="max-w-3xl mx-auto text-center">
           <div className="font-sanskrit text-3xl text-siddhi-gold mb-4">वाक् सिद्धि</div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
             Your voice, perfected.
           </h2>
           <p className="text-lg text-siddhi-ivory/70 mb-10">
@@ -356,7 +356,7 @@ export default function Home() {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="py-10 px-6 bg-siddhi-black text-siddhi-ivory/60 border-t border-siddhi-ivory/10">
+      <footer className="py-8 sm:py-10 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory/60 border-t border-siddhi-ivory/10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <div className="flex items-baseline gap-2">
             <span className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
