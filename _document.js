@@ -1,44 +1,48 @@
-import { Html, Head, Main, NextScript } from 'next/document';
+/* font-display: swap tells browser to show fallback fonts immediately, 
+   then swap to custom fonts when loaded — fixes mobile render-blocking */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Tiro+Devanagari+Sanskrit&display=swap');
 
-export default function Document() {
-  return (
-    <Html lang="en">
-      <Head>
-        <meta charSet="utf-8" />
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-        {/* Favicon */}
-        <link rel="icon" href="/favicon.ico" />
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #FFF8E7;
+  color: #0A0A0A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-        {/* Primary SEO */}
-        <meta name="description" content="SIDDHI — India's first Communication AI. Master interviews, negotiation, and public speaking with AI rooted in Indian heritage. Ancient Wisdom. Modern AI." />
-        <meta name="keywords" content="SIDDHI, AI interview coach India, communication AI, mock interview AI, Indian interview prep, वाक् सिद्धि, communication training India" />
-        <meta name="author" content="Parag Gokhale" />
-        <meta name="robots" content="index, follow" />
+* {
+  box-sizing: border-box;
+}
 
-        {/* Open Graph (LinkedIn, WhatsApp link previews) */}
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="SIDDHI" />
-        <meta property="og:title" content="SIDDHI — India's first Communication AI" />
-        <meta property="og:description" content="वाक् सिद्धि · Mastery of Speech. Train your voice with AI built for Indian professionals. Free interview practice today." />
-        <meta property="og:url" content="https://siddhiai.in" />
-        <meta property="og:locale" content="en_IN" />
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="SIDDHI — India's first Communication AI" />
-        <meta name="twitter:description" content="Ancient Wisdom. Modern AI. Train your communication with an AI that gets the Indian context." />
+/* Improve text contrast for accessibility — fixes Lighthouse contrast warnings */
+.text-siddhi-black\/60 {
+  color: rgba(10, 10, 10, 0.72);
+}
 
-        {/* Theme color (browser tab bar on mobile) */}
-        <meta name="theme-color" content="#FF9933" />
+.text-siddhi-black\/50 {
+  color: rgba(10, 10, 10, 0.65);
+}
 
-        {/* Preconnect to Google Fonts — speeds up font loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </Head>
-      <body>
-        <Main />
-        <NextScript />
-      </body>
-    </Html>
-  );
+/* Smooth scroll for anchor links (#features, #pricing) */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus rings for keyboard accessibility */
+*:focus-visible {
+  outline: 2px solid #FF9933;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
