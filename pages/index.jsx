@@ -108,7 +108,7 @@ export default function Home() {
             <span className="font-display text-2xl sm:text-3xl font-bold text-siddhi-saffron tracking-tight">
               SIDDHI
             </span>
-            <span className="font-sanskrit text-sm text-siddhi-gold hidden sm:inline">सिद्धि</span>
+            <span className="font-sanskrit text-xs sm:text-sm text-siddhi-gold">सिद्धि</span>
           </div>
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
             <a href="#features" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">
