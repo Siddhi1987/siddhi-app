@@ -1,0 +1,1 @@
+SIDDHI public assets folder
