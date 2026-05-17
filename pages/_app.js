@@ -7,7 +7,6 @@ import FeedbackButton from '../components/FeedbackButton';
 const GA_MEASUREMENT_ID = 'G-FHBXT2SDGL';
 const CLARITY_PROJECT_ID = 'wsfvfc784e';
 
-// Per-page titles for better SEO + link previews
 const PAGE_TITLES = {
   '/': 'SIDDHI — India\'s First Communication AI Inspired by Vak Siddhi',
   '/interview': 'AI Mock Interview Practice — SIDDHI',
@@ -41,6 +40,8 @@ export default function App({ Component, pageProps }) {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://siddhiai.in" />
         <link rel="canonical" href={`https://siddhiai.in${router.pathname === '/' ? '' : router.pathname}`} />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
 
       <Script
