@@ -40,7 +40,8 @@ export default function App({ Component, pageProps }) {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://siddhiai.in" />
         <link rel="canonical" href={`https://siddhiai.in${router.pathname === '/' ? '' : router.pathname}`} />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
 
