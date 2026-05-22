@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="260" viewBox="0 0 920 260" role="img" aria-label="SIDDHI logo">
-<rect width="920" height="260" fill="none"/>
-<g transform="translate(32 42)" stroke="#B87816" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-<path d="M112 88H12"/><path d="M112 88L28 50V38"/><path d="M112 88L50 38V24"/><path d="M112 88L76 28V12"/><path d="M112 88L105 22V5"/><path d="M112 88L134 24V8"/>
-<path d="M112 88L28 126V140"/><path d="M112 88L50 138V154"/><path d="M112 88L76 148V170"/><path d="M112 88L105 154V184"/><path d="M112 88L134 152V176"/>
-<path d="M112 88H166"/><path d="M112 88L166 58"/><path d="M112 88L166 118"/>
-<path d="M180 0V190" stroke-dasharray="9 11"/>
-<circle cx="12" cy="88" r="5"/><circle cx="28" cy="38" r="5"/><circle cx="50" cy="24" r="5"/><circle cx="76" cy="12" r="5"/><circle cx="105" cy="5" r="5"/><circle cx="134" cy="8" r="5"/>
-<circle cx="28" cy="140" r="5"/><circle cx="50" cy="154" r="5"/><circle cx="76" cy="170" r="5"/><circle cx="105" cy="184" r="5"/><circle cx="134" cy="176" r="5"/>
-<circle cx="166" cy="88" r="5"/><circle cx="166" cy="58" r="5"/><circle cx="166" cy="118" r="5"/>
-</g>
-<text x="245" y="154" font-family="Georgia, 'Times New Roman', serif" font-size="108" font-weight="700" letter-spacing="4" fill="#F7931E">SIDDHI</text>
-<text x="760" y="154" font-family="serif" font-size="54" font-weight="700" fill="#B9932F">सिद्धि</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="260" viewBox="0 0 920 260"><rect width="920" height="260" fill="none"/><g transform="translate(25 30)" stroke="#B87816" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M110 90H10"/><path d="M110 90L25 50V38"/><path d="M110 90L48 38V24"/><path d="M110 90L74 28V12"/><path d="M110 90L102 22V5"/><path d="M110 90L132 24V8"/><path d="M110 90L25 130V144"/><path d="M110 90L48 142V156"/><path d="M110 90L74 152V170"/><path d="M110 90L102 158V184"/><path d="M110 90L132 154V176"/><path d="M110 90H165"/><path d="M110 90L165 60"/><path d="M110 90L165 120"/><path d="M178 0V190" stroke-dasharray="8 10"/><circle cx="10" cy="90" r="5"/><circle cx="25" cy="38" r="5"/><circle cx="48" cy="24" r="5"/><circle cx="74" cy="12" r="5"/><circle cx="102" cy="5" r="5"/><circle cx="132" cy="8" r="5"/><circle cx="25" cy="144" r="5"/><circle cx="48" cy="156" r="5"/><circle cx="74" cy="170" r="5"/><circle cx="102" cy="184" r="5"/><circle cx="132" cy="176" r="5"/><circle cx="165" cy="90" r="5"/><circle cx="165" cy="60" r="5"/><circle cx="165" cy="120" r="5"/></g><text x="235" y="155" font-family="Georgia, serif" font-size="110" font-weight="700" fill="#F7931E">SIDDHI</text><text x="760" y="154" font-family="serif" font-size="54" font-weight="700" fill="#B9932F">सिद्धि</text></svg>
