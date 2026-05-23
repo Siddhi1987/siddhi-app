@@ -10,6 +10,7 @@ export default function Home() {
   const [modalName, setModalName] = useState('');
   const [modalSubmitting, setModalSubmitting] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
+  const [openProof, setOpenProof] = useState(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -65,6 +66,21 @@ export default function Home() {
       setModalSubmitting(false);
     }
   };
+
+  const proofCards = [
+    {
+      title: 'Built by HR experience',
+      detail: 'Designed using real HR screening patterns, hiring evaluations, and communication feedback logic.',
+    },
+    {
+      title: 'Role-specific interview practice',
+      detail: 'Practice tailored interviews for HR, Sales, Engineering, Marketing, Product, and more.',
+    },
+    {
+      title: 'Free start, premium upgrade',
+      detail: 'Start free. Upgrade for unlimited practice, deeper analytics, and premium HR-style feedback.',
+    },
+  ];
 
   const features = [
     {
@@ -181,9 +197,26 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-sm">
-            <div className="bg-white/70 border border-siddhi-black/10 rounded-lg p-3">Built by HR experience</div>
-            <div className="bg-white/70 border border-siddhi-black/10 rounded-lg p-3">Role-specific interview practice</div>
-            <div className="bg-white/70 border border-siddhi-black/10 rounded-lg p-3">Free start, premium upgrade</div>
+            {proofCards.map((card, index) => {
+              const isOpen = openProof === index;
+              return (
+                <button
+                  key={card.title}
+                  type="button"
+                  onClick={() => setOpenProof(isOpen ? null : index)}
+                  className={`bg-white/70 border rounded-lg p-3 text-center transition hover:border-siddhi-saffron hover:shadow-md ${
+                    isOpen ? 'border-siddhi-saffron shadow-md' : 'border-siddhi-black/10'
+                  }`}
+                  aria-expanded={isOpen}
+                >
+                  <div className="font-medium">{card.title}</div>
+                  <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-28 mt-2 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className="text-xs leading-relaxed text-siddhi-black/65">{card.detail}</p>
+                  </div>
+                  <div className="mt-1 text-xs text-siddhi-saffron font-semibold">{isOpen ? 'Tap to close' : 'Tap to know more'}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
