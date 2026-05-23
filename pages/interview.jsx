@@ -518,7 +518,7 @@ export default function Interview() {
                   type="text"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  placeholder="e.g. Priya Sharma"
+                  placeholder="e.g. Your name"
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
               </div>
@@ -531,7 +531,7 @@ export default function Interview() {
                   type="tel"
                   value={userMobile}
                   onChange={(e) => setUserMobile(e.target.value.replace(/[^0-9+]/g, ''))}
-                  placeholder="e.g. 9876543210"
+                  placeholder="Your number"
                   maxLength={15}
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
