@@ -249,31 +249,55 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f) => {
-              const cardClasses = `p-6 rounded-lg border-2 transition text-left w-full ${
-                f.live ? 'border-siddhi-saffron bg-siddhi-ivory hover:shadow-lg hover:scale-[1.02]' : 'border-siddhi-black/10 bg-siddhi-ivory/50 hover:border-siddhi-saffron/50 hover:shadow-md'
-              }`;
-              const cardContent = (
-                <>
-                  <div className="text-4xl mb-4">{f.emoji}</div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-display text-xl font-bold">{f.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${f.live ? 'bg-siddhi-saffron text-white' : 'bg-siddhi-black/10 text-siddhi-black/60'}`}>
-                      {f.live ? 'LIVE' : 'PRIORITY'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-siddhi-black/70 mb-3">{f.desc}</p>
-                  <div className="text-xs font-semibold text-siddhi-saffron">{f.live ? 'Try now →' : 'Join priority list →'}</div>
-                </>
-              );
+  {features.map((f) => {
+    const cardClasses = `p-6 rounded-lg border-2 transition text-left w-full ${
+      f.live
+        ? 'border-siddhi-saffron bg-siddhi-ivory hover:shadow-lg hover:scale-[1.02]'
+        : 'border-siddhi-black/10 bg-siddhi-ivory/50 hover:border-siddhi-saffron/50 hover:shadow-md'
+    }`;
 
-              return f.live ? (
-                <Link key={f.title} href={f.href} className={cardClasses}>{cardContent}</Link>
-              ) : (
-                <button key={f.title} onClick={() => openModal(f.module)} className={cardClasses}>{cardContent}</button>
-              );
-            })}
-          </div>
+    const cardContent = (
+      <>
+        <div className="text-4xl mb-4">{f.emoji}</div>
+
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="font-display text-xl font-bold">{f.title}</h3>
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+              f.live
+                ? 'bg-siddhi-saffron text-white'
+                : 'bg-siddhi-black/10 text-siddhi-black/60'
+            }`}
+          >
+            {f.live ? 'LIVE' : 'PRIORITY'}
+          </span>
+        </div>
+
+        <p className="text-sm text-siddhi-black/70 mb-3">{f.desc}</p>
+
+        <div className="text-xs font-semibold text-siddhi-saffron">
+          {f.live ? 'Start interview →' : 'Join priority list →'}
+        </div>
+      </>
+    );
+
+    return f.live ? (
+      <Link key={f.title} href={f.href} className={cardClasses}>
+        {cardContent}
+      </Link>
+    ) : (
+      <button
+        key={f.title}
+        type="button"
+        onClick={() => openModal(f.module)}
+        className={cardClasses}
+      >
+        {cardContent}
+      </button>
+    );
+  })}
+</div>
+
         </div>
       </section>
 <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
