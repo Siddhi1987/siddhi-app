@@ -220,6 +220,23 @@ export default function Home() {
           </div>
         </div>
       </section>
+<section className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
+  <div className="max-w-6xl mx-auto">
+    <div className="text-center mb-12">
+      <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
+        Simple Process
+      </p>
+
+      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+        How SIDDHI Works
+      </h2>
+
+      <p className="text-siddhi-black/60 max-w-2xl mx-auto">
+        Simple AI interview practice designed for clarity, confidence, and hiring readiness.
+      </p>
+    </div>
+  </div>
+</section>
 
       <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
