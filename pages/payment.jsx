@@ -195,7 +195,7 @@ export default function Payment() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
+                  placeholder="Your name"
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
               </div>
@@ -215,7 +215,7 @@ export default function Payment() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="98765 43210"
+                  placeholder="Your number"
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
               </div>
