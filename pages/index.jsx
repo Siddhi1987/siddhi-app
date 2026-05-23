@@ -276,6 +276,96 @@ export default function Home() {
           </div>
         </div>
       </section>
+<section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
+  <div className="max-w-6xl mx-auto">
+    <div className="text-center mb-12">
+      <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
+        Live Product Preview
+      </p>
+
+      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+        Experience a SIDDHI Interview
+      </h2>
+
+      <p className="text-siddhi-black/60 max-w-2xl mx-auto">
+        See how SIDDHI turns interview answers into clear, HR-style communication feedback.
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-6 items-stretch">
+      <div className="bg-siddhi-ivory border border-siddhi-black/10 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold">
+            AI
+          </div>
+          <div>
+            <div className="font-semibold">SIDDHI Interviewer</div>
+            <div className="text-xs text-siddhi-black/50">Role-specific mock interview</div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-5 border border-siddhi-black/10 mb-5">
+          <p className="text-lg font-semibold text-siddhi-black">
+            “Tell me about yourself.”
+          </p>
+        </div>
+
+        <div className="bg-white/70 rounded-xl p-5 border border-siddhi-black/10">
+          <p className="text-sm text-siddhi-black/60 mb-2">Candidate answer sample</p>
+          <p className="text-siddhi-black/75">
+            I am a final-year student with strong interest in people operations and communication.
+            I have worked on college hiring projects and want to improve how I structure my answers.
+          </p>
+        </div>
+
+        <div className="mt-5 text-sm text-siddhi-saffron font-semibold">
+          AI is analyzing clarity, structure, and confidence...
+        </div>
+      </div>
+
+      <div className="bg-siddhi-black text-siddhi-ivory rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div className="mb-6">
+          <p className="text-sm uppercase tracking-widest text-siddhi-gold font-semibold mb-2">
+            HR-style Feedback
+          </p>
+          <h3 className="font-display text-3xl font-bold">
+            Communication Scorecard
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white/10 rounded-xl p-4">
+            <div className="text-xs text-siddhi-ivory/60 mb-1">Confidence</div>
+            <div className="text-3xl font-bold text-siddhi-saffron">82%</div>
+          </div>
+
+          <div className="bg-white/10 rounded-xl p-4">
+            <div className="text-xs text-siddhi-ivory/60 mb-1">Clarity</div>
+            <div className="text-3xl font-bold text-siddhi-saffron">Strong</div>
+          </div>
+
+          <div className="bg-white/10 rounded-xl p-4">
+            <div className="text-xs text-siddhi-ivory/60 mb-1">Structure</div>
+            <div className="text-xl font-bold">Needs work</div>
+          </div>
+
+          <div className="bg-white/10 rounded-xl p-4">
+            <div className="text-xs text-siddhi-ivory/60 mb-1">Filler words</div>
+            <div className="text-3xl font-bold">3</div>
+          </div>
+        </div>
+
+        <div className="bg-white/10 rounded-xl p-5">
+          <h4 className="font-semibold mb-2 text-siddhi-gold">Improvement action</h4>
+          <p className="text-sm text-siddhi-ivory/75">
+            Add one measurable example and follow a simple structure:
+            Situation → Action → Result.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section id="hr" className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
