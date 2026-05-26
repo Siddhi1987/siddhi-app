@@ -121,7 +121,7 @@ export default function Home() {
       desc: 'For students and professionals who want quick practice before interviews.',
       items: ['Role-specific AI mock interview', 'Instant communication feedback', 'Clarity and structure scoring', '3-question focused session'],
       cta: 'Start AI Practice',
-      href: '/interview',
+      href: '/payment',
       primary: false,
     },
     {
