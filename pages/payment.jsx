@@ -20,7 +20,7 @@ const PLANS = [
 ];
 
 export default function Payment() {
-  const [selectedPlan, setSelectedPlan] = useState(PLANS[1]);
+  const [selectedPlan, setSelectedPlan] = useState(PLANS[0]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
