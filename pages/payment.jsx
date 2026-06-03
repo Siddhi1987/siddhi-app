@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 const PLAN = {
-  id: 'interview-preparation-499',
-  name: 'SiddhiAI Interview Preparation Package',
+  id: 'monthly-499',
+  name: 'SiddhiAI Monthly Access',
   price: 499,
-  period: 'one-time',
+  period: 'month',
+  durationDays: 30,
 };
 
 export default function Payment() {
@@ -30,7 +31,7 @@ export default function Payment() {
 
   const handlePayment = async () => {
     const cleanName = name.trim();
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.replace(/\s/g, '');
 
     if (!cleanName || !cleanEmail || !cleanPhone) {
@@ -79,7 +80,7 @@ export default function Payment() {
           phone: cleanPhone,
           packageName: PLAN.name,
           amount: PLAN.price,
-          source: 'siddhiai_payment_page',
+          source: 'siddhiai_monthly_payment_page',
         }),
       });
 
@@ -94,7 +95,7 @@ export default function Payment() {
         amount: order.amount,
         currency: order.currency || 'INR',
         name: 'SiddhiAI',
-        description: `${PLAN.name} - Communication Intelligence`,
+        description: `${PLAN.name} - 30 days access`,
         image: '/favicon.ico',
         order_id: order.id,
         prefill: {
@@ -107,19 +108,50 @@ export default function Payment() {
           email: cleanEmail,
           phone: cleanPhone,
           package: PLAN.name,
+          duration: '30 days',
           price: PLAN.price,
         },
         theme: {
           color: '#FF9933',
         },
-        handler: function (response) {
-          setLoading(false);
+        handler: async function (response) {
+          try {
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                ...response,
+                name: cleanName,
+                email: cleanEmail,
+                phone: cleanPhone,
+                packageName: PLAN.name,
+              }),
+            });
 
-          alert(
-            `Payment successful!\n\nPayment ID: ${response.razorpay_payment_id}\nOrder ID: ${response.razorpay_order_id}`
-          );
+            const verification = await verifyResponse.json();
 
-          window.location.href = `/interview?payment=success&order_id=${response.razorpay_order_id}&payment_id=${response.razorpay_payment_id}`;
+            if (!verifyResponse.ok || !verification?.verified) {
+              throw new Error(verification?.message || 'Payment verification failed');
+            }
+
+            const dashboardParams = new URLSearchParams({
+              access: 'active',
+              name: cleanName,
+              email: cleanEmail,
+              phone: cleanPhone,
+              payment_id: response.razorpay_payment_id,
+              order_id: response.razorpay_order_id,
+              plan: PLAN.name,
+            });
+
+            window.location.href = `/dashboard?${dashboardParams.toString()}`;
+          } catch (error) {
+            console.error('Verification error:', error);
+            setLoading(false);
+            alert('Payment received, but access verification failed. Please contact support@siddhiai.in with your payment ID.');
+          }
         },
         modal: {
           ondismiss: function () {
@@ -152,7 +184,7 @@ export default function Payment() {
             href="/interview"
             className="text-sm text-siddhi-black/60 hover:text-siddhi-saffron"
           >
-            ← Back to coach
+            Try free tool
           </Link>
         </div>
       </nav>
@@ -160,23 +192,23 @@ export default function Payment() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-            ₹499 Interview Preparation Package
+            ₹499 Monthly Subscription
           </p>
 
           <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-            Activate SiddhiAI
+            Unlock deeper communication intelligence
           </h1>
 
           <p className="text-siddhi-black/60 max-w-xl mx-auto">
-            Practice real interviews, improve communication clarity, and prepare
-            with AI-powered guidance.
+            Use the free tool first. Upgrade when you want deeper AI-generated feedback,
+            interview history, and communication score tracking for 30 days.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h2 className="font-display text-2xl font-bold mb-4">
-              Your package
+              Your monthly access
             </h2>
 
             <div className="w-full p-5 rounded-lg border-2 text-left transition border-siddhi-saffron bg-white shadow-lg mb-6">
@@ -195,23 +227,23 @@ export default function Payment() {
                 </div>
 
                 <span className="text-xs px-2 py-1 bg-siddhi-saffron text-white rounded-full font-bold">
-                  Live
+                  30 Days
                 </span>
               </div>
             </div>
 
             <div className="bg-white border border-siddhi-black/10 rounded-lg p-5">
               <h3 className="font-display text-base font-bold mb-3">
-                What you get
+                What activates after payment
               </h3>
 
               <ul className="space-y-2 text-sm text-siddhi-black/75">
-                <li>✓ AI-powered interview preparation</li>
-                <li>✓ HR and behavioral interview practice</li>
-                <li>✓ Communication clarity feedback</li>
-                <li>✓ Confidence-building practice flow</li>
-                <li>✓ Career readiness guidance</li>
-                <li>✓ Access activation after successful payment</li>
+                <li>✓ 30 days SiddhiAI access</li>
+                <li>✓ AI Interview Practice</li>
+                <li>✓ Deeper communication feedback</li>
+                <li>✓ Communication score dashboard</li>
+                <li>✓ Previous reports area</li>
+                <li>✓ Interview history area</li>
               </ul>
             </div>
           </div>
@@ -268,6 +300,11 @@ export default function Payment() {
                 <span>₹{PLAN.price.toLocaleString('en-IN')}</span>
               </div>
 
+              <div className="flex justify-between mb-2 text-sm text-siddhi-black/60">
+                <span>Access duration</span>
+                <span>{PLAN.durationDays} days</span>
+              </div>
+
               <div className="border-t border-siddhi-black/10 pt-2 flex justify-between font-bold">
                 <span>Total</span>
                 <span className="text-siddhi-saffron">
@@ -293,7 +330,7 @@ export default function Payment() {
                 <Link href="/terms" className="text-siddhi-saffron underline">
                   Terms & Conditions
                 </Link>
-                .
+                . I understand this activates 30 days of SiddhiAI access.
               </span>
             </label>
 
@@ -303,13 +340,13 @@ export default function Payment() {
               className="w-full px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading
-                ? 'Creating secure order…'
-                : `Pay ₹${PLAN.price.toLocaleString('en-IN')} securely →`}
+                ? 'Creating secure monthly access…'
+                : `Pay ₹${PLAN.price.toLocaleString('en-IN')} for 30 days →`}
             </button>
 
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-siddhi-black/50">
               <span>🔒</span>
-              <span>Secured by Razorpay · Order ID enabled</span>
+              <span>Secured by Razorpay · Payment verification enabled</span>
             </div>
           </div>
         </div>
