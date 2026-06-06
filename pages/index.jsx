@@ -88,7 +88,7 @@ export default function Home() {
       title: 'AI Interview Coach',
       desc: 'Practice role-specific interview answers and get instant feedback on clarity, structure, confidence, and relevance.',
       live: true,
-      href: '/interview',
+      href: '/start',
     },
     {
       emoji: '🧑‍💼',
@@ -121,7 +121,7 @@ export default function Home() {
       desc: 'For students and professionals who want quick practice before interviews.',
       items: ['Role-specific AI mock interview', 'Instant communication feedback', 'Clarity and structure scoring', '3-question focused session'],
       cta: 'Start AI Practice',
-      href: '/payment',
+      href: '/start',
       primary: false,
     },
     {
@@ -161,8 +161,8 @@ export default function Home() {
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
             <a href="#offers" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Pricing</a>
             <a href="#hr" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Real HR</a>
-            <Link href="/interview" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
-              Start Interview
+            <Link href="/start" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
+              Start Free Check
             </Link>
           </div>
         </div>
@@ -184,12 +184,12 @@ export default function Home() {
 
           <p className="text-xl md:text-2xl text-siddhi-black/70 mb-3 font-light">Ancient Wisdom. Modern AI.</p>
           <p className="text-base md:text-lg text-siddhi-black/60 max-w-2xl mx-auto mb-10">
-            SIDDHI helps students and professionals improve interview communication, answer structure, confidence, and hiring readiness through AI practice and premium HR-style evaluation.
+            SIDDHI helps students and professionals practice interview answers, understand weak areas, and build confidence before the real interview.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 max-w-md sm:max-w-none mx-auto">
-            <Link href="/interview" className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center">
-              Start AI Mock Interview →
+            <Link href="/start" className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center">
+              Start Free Interview Check
             </Link>
             <button onClick={() => openModal('Real HR Mock Interview')} className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-base sm:text-lg text-center">
               Request Real HR Interview
@@ -220,23 +220,38 @@ export default function Home() {
           </div>
         </div>
       </section>
-<section className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
-  <div className="max-w-6xl mx-auto">
-    <div className="text-center mb-12">
-      <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-        Simple Process
-      </p>
 
-      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-        How SIDDHI Works
-      </h2>
-
-      <p className="text-siddhi-black/60 max-w-2xl mx-auto">
-        Simple AI interview practice designed for clarity, confidence, and hiring readiness.
-      </p>
-    </div>
-  </div>
-</section>
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
+              Simple Process
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              How SIDDHI Works
+            </h2>
+            <p className="text-siddhi-black/60 max-w-2xl mx-auto">
+              Simple AI interview practice designed for clarity, confidence, and hiring readiness.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-4">
+            {[
+              ['Choose your path', 'Student, fresher, placement candidate, or experienced professional.'],
+              ['Create readiness profile', 'Share your target role, confidence level, and biggest interview challenge.'],
+              ['Practice with AI', 'Answer focused interview questions and get instant communication feedback.'],
+              ['Unlock improvement', 'Use the preview to decide if 30-day access or HR guidance is right for you.'],
+            ].map(([title, description], index) => (
+              <div key={title} className="bg-white border border-siddhi-black/10 rounded-2xl p-5 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold mb-4">
+                  {index + 1}
+                </div>
+                <h3 className="font-display text-xl font-bold mb-2">{title}</h3>
+                <p className="text-sm text-siddhi-black/60">{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
@@ -249,147 +264,90 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-  {features.map((f) => {
-    const cardClasses = `p-6 rounded-lg border-2 transition text-left w-full ${
-      f.live
-        ? 'border-siddhi-saffron bg-siddhi-ivory hover:shadow-lg hover:scale-[1.02]'
-        : 'border-siddhi-black/10 bg-siddhi-ivory/50 hover:border-siddhi-saffron/50 hover:shadow-md'
-    }`;
+            {features.map((f) => {
+              const cardClasses = `p-6 rounded-lg border-2 transition text-left w-full ${
+                f.live
+                  ? 'border-siddhi-saffron bg-siddhi-ivory hover:shadow-lg hover:scale-[1.02]'
+                  : 'border-siddhi-black/10 bg-siddhi-ivory/50 hover:border-siddhi-saffron/50 hover:shadow-md'
+              }`;
 
-    const cardContent = (
-      <>
-        <div className="text-4xl mb-4">{f.emoji}</div>
+              const cardContent = (
+                <>
+                  <div className="text-4xl mb-4">{f.emoji}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-display text-xl font-bold">{f.title}</h3>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${f.live ? 'bg-siddhi-saffron text-white' : 'bg-siddhi-black/10 text-siddhi-black/60'}`}>
+                      {f.live ? 'LIVE' : 'PRIORITY'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-siddhi-black/70 mb-3">{f.desc}</p>
+                  <div className="text-xs font-semibold text-siddhi-saffron">
+                    {f.live ? 'Start interview →' : 'Join priority list →'}
+                  </div>
+                </>
+              );
 
-        <div className="flex items-center gap-2 mb-2">
-          <h3 className="font-display text-xl font-bold">{f.title}</h3>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-              f.live
-                ? 'bg-siddhi-saffron text-white'
-                : 'bg-siddhi-black/10 text-siddhi-black/60'
-            }`}
-          >
-            {f.live ? 'LIVE' : 'PRIORITY'}
-          </span>
-        </div>
-
-        <p className="text-sm text-siddhi-black/70 mb-3">{f.desc}</p>
-
-        <div className="text-xs font-semibold text-siddhi-saffron">
-          {f.live ? 'Start interview →' : 'Join priority list →'}
-        </div>
-      </>
-    );
-
-    return f.live ? (
-      <Link key={f.title} href={f.href} className={cardClasses}>
-        {cardContent}
-      </Link>
-    ) : (
-      <button
-        key={f.title}
-        type="button"
-        onClick={() => openModal(f.module)}
-        className={cardClasses}
-      >
-        {cardContent}
-      </button>
-    );
-  })}
-</div>
-
+              return f.live ? (
+                <Link key={f.title} href={f.href} className={cardClasses}>
+                  {cardContent}
+                </Link>
+              ) : (
+                <button key={f.title} type="button" onClick={() => openModal(f.module)} className={cardClasses}>
+                  {cardContent}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
-<section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
-  <div className="max-w-6xl mx-auto">
-    <div className="text-center mb-12">
-      <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-        Live Product Preview
-      </p>
 
-      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-        Experience a SIDDHI Interview
-      </h2>
-
-      <p className="text-siddhi-black/60 max-w-2xl mx-auto">
-        See how SIDDHI turns interview answers into clear, HR-style communication feedback.
-      </p>
-    </div>
-
-    <div className="grid md:grid-cols-2 gap-6 items-stretch">
-      <div className="bg-siddhi-ivory border border-siddhi-black/10 rounded-2xl p-6 sm:p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold">
-            AI
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Live Product Preview</p>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Experience a SIDDHI Interview</h2>
+            <p className="text-siddhi-black/60 max-w-2xl mx-auto">See how SIDDHI turns interview answers into clear, HR-style communication feedback.</p>
           </div>
-          <div>
-            <div className="font-semibold">SIDDHI Interviewer</div>
-            <div className="text-xs text-siddhi-black/50">Role-specific mock interview</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 border border-siddhi-black/10 mb-5">
-          <p className="text-lg font-semibold text-siddhi-black">
-            “Tell me about yourself.”
-          </p>
-        </div>
-
-        <div className="bg-white/70 rounded-xl p-5 border border-siddhi-black/10">
-          <p className="text-sm text-siddhi-black/60 mb-2">Candidate answer sample</p>
-          <p className="text-siddhi-black/75">
-            I am a final-year student with strong interest in people operations and communication.
-            I have worked on college hiring projects and want to improve how I structure my answers.
-          </p>
-        </div>
-
-        <div className="mt-5 text-sm text-siddhi-saffron font-semibold">
-          AI is analyzing clarity, structure, and confidence...
-        </div>
-      </div>
-
-      <div className="bg-siddhi-black text-siddhi-ivory rounded-2xl p-6 sm:p-8 shadow-xl">
-        <div className="mb-6">
-          <p className="text-sm uppercase tracking-widest text-siddhi-gold font-semibold mb-2">
-            HR-style Feedback
-          </p>
-          <h3 className="font-display text-3xl font-bold">
-            Communication Scorecard
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white/10 rounded-xl p-4">
-            <div className="text-xs text-siddhi-ivory/60 mb-1">Confidence</div>
-            <div className="text-3xl font-bold text-siddhi-saffron">82%</div>
-          </div>
-
-          <div className="bg-white/10 rounded-xl p-4">
-            <div className="text-xs text-siddhi-ivory/60 mb-1">Clarity</div>
-            <div className="text-3xl font-bold text-siddhi-saffron">Strong</div>
-          </div>
-
-          <div className="bg-white/10 rounded-xl p-4">
-            <div className="text-xs text-siddhi-ivory/60 mb-1">Structure</div>
-            <div className="text-xl font-bold">Needs work</div>
-          </div>
-
-          <div className="bg-white/10 rounded-xl p-4">
-            <div className="text-xs text-siddhi-ivory/60 mb-1">Filler words</div>
-            <div className="text-3xl font-bold">3</div>
+          <div className="grid md:grid-cols-2 gap-6 items-stretch">
+            <div className="bg-siddhi-ivory border border-siddhi-black/10 rounded-2xl p-6 sm:p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold">AI</div>
+                <div>
+                  <div className="font-semibold">SIDDHI Interviewer</div>
+                  <div className="text-xs text-siddhi-black/50">Role-specific mock interview</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-5 border border-siddhi-black/10 mb-5">
+                <p className="text-lg font-semibold text-siddhi-black">“Tell me about yourself.”</p>
+              </div>
+              <div className="bg-white/70 rounded-xl p-5 border border-siddhi-black/10">
+                <p className="text-sm text-siddhi-black/60 mb-2">Candidate answer sample</p>
+                <p className="text-siddhi-black/75">
+                  I am a final-year student with strong interest in people operations and communication.
+                  I have worked on college hiring projects and want to improve how I structure my answers.
+                </p>
+              </div>
+              <div className="mt-5 text-sm text-siddhi-saffron font-semibold">AI is analyzing clarity, structure, and confidence...</div>
+            </div>
+            <div className="bg-siddhi-black text-siddhi-ivory rounded-2xl p-6 sm:p-8 shadow-xl">
+              <div className="mb-6">
+                <p className="text-sm uppercase tracking-widest text-siddhi-gold font-semibold mb-2">HR-style Feedback</p>
+                <h3 className="font-display text-3xl font-bold">Communication Scorecard</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Confidence</div><div className="text-3xl font-bold text-siddhi-saffron">82%</div></div>
+                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Clarity</div><div className="text-3xl font-bold text-siddhi-saffron">Strong</div></div>
+                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Structure</div><div className="text-xl font-bold">Needs work</div></div>
+                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Filler words</div><div className="text-3xl font-bold">3</div></div>
+              </div>
+              <div className="bg-white/10 rounded-xl p-5">
+                <h4 className="font-semibold mb-2 text-siddhi-gold">Improvement action</h4>
+                <p className="text-sm text-siddhi-ivory/75">Add one measurable example and follow a simple structure: Situation → Action → Result.</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="bg-white/10 rounded-xl p-5">
-          <h4 className="font-semibold mb-2 text-siddhi-gold">Improvement action</h4>
-          <p className="text-sm text-siddhi-ivory/75">
-            Add one measurable example and follow a simple structure:
-            Situation → Action → Result.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
       <section id="hr" className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
@@ -425,7 +383,6 @@ export default function Home() {
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Simple pricing for the first growth sprint.</h2>
             <p className="text-siddhi-black/60 max-w-2xl mx-auto">Start with AI. Upgrade when the interview is serious.</p>
           </div>
-
           <div className="grid md:grid-cols-3 gap-6">
             {offers.map((offer) => (
               <div key={offer.name} className={`p-7 rounded-lg border-2 relative ${offer.primary ? 'border-siddhi-saffron bg-gradient-to-br from-siddhi-ivory to-white shadow-xl' : 'border-siddhi-black/10 bg-siddhi-ivory/40'}`}>
@@ -457,7 +414,7 @@ export default function Home() {
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Prepare before the interview prepares you.</h2>
           <p className="text-lg text-siddhi-ivory/70 mb-10">Use AI practice first. Upgrade to human HR feedback when the opportunity matters.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/interview" className="inline-block px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-2xl text-lg">Start AI Interview →</Link>
+            <Link href="/start" className="inline-block px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-2xl text-lg">Start Free Interview Check</Link>
             <button onClick={() => openModal('Real HR Mock Interview')} className="inline-block px-8 py-4 border-2 border-siddhi-ivory text-siddhi-ivory font-semibold rounded-md hover:bg-siddhi-ivory hover:text-siddhi-black transition text-lg">Request HR Slot</button>
           </div>
         </div>
