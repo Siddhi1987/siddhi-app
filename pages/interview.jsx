@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 // =================== DROPDOWN OPTIONS ===================
 const GRADUATION_FIELDS = [
@@ -86,6 +87,51 @@ const EXPERIENCED_QUESTIONS = {
 
 const FREE_LIMIT = 3;
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
+const PREMIUM_REPORT_SECTIONS = [
+  'Hiring Manager Impression',
+  'Leadership Potential',
+  'Interview Readiness',
+  'Career Growth Roadmap',
+  'Personalized Recommendations',
+];
+
+const clampScore = (score) => Math.max(35, Math.min(96, Math.round(score)));
+
+const buildCommunicationReport = (feedback, profileLabel) => {
+  const clarityScore = clampScore(feedback.clarity);
+  const structureScore = clampScore(feedback.structure);
+  const confidenceScore = clampScore(
+    68 + Math.min(feedback.wordCount, 180) * 0.08 - feedback.fillerCount * 7 + (feedback.sentences >= 3 ? 6 : 0)
+  );
+  const professionalPresenceScore = clampScore(
+    62 + (feedback.hasNumbers ? 14 : 0) + (feedback.fillerCount <= 1 ? 10 : 0) + (feedback.wordCount >= 70 ? 8 : 0)
+  );
+  const communicationScore = clampScore(
+    clarityScore * 0.28 + confidenceScore * 0.24 + structureScore * 0.24 + professionalPresenceScore * 0.24
+  );
+  const topStrength = feedback.strengths?.[0] || 'You are able to communicate your intent clearly.';
+  const firstImprovement = feedback.improvements?.[0];
+  const biggestImprovementArea = firstImprovement
+    ? `${firstImprovement.title.replace(/[^\w\s:.-]/g, '').trim()}: ${firstImprovement.detail}`
+    : 'Add one specific example with measurable outcome to make your answer more convincing.';
+
+  return {
+    profileLabel,
+    communicationScore,
+    clarityScore,
+    confidenceScore,
+    structureScore,
+    professionalPresenceScore,
+    topStrength,
+    biggestImprovementArea,
+    scoreCards: [
+      { label: 'Clarity', value: clarityScore, hint: 'How easy your answer is to understand.' },
+      { label: 'Confidence', value: confidenceScore, hint: 'How steady and direct your answer feels.' },
+      { label: 'Structure', value: structureScore, hint: 'Whether the answer has a clear beginning, middle, and result.' },
+      { label: 'Professional Presence', value: professionalPresenceScore, hint: 'How credible you sound to a hiring manager.' },
+    ],
+  };
+};
 
 // =================== SEARCHABLE DROPDOWN COMPONENT ===================
 function SearchableDropdown({ label, options, value, onChange, otherValue, onOtherChange, required, placeholder }) {
@@ -202,6 +248,8 @@ export default function Interview() {
   const [answer, setAnswer] = useState('');
   const [sessionsUsed, setSessionsUsed] = useState(0);
   const [feedback, setFeedback] = useState(null);
+  const [communicationReport, setCommunicationReport] = useState(null);
+  const [reportSaveStatus, setReportSaveStatus] = useState('');
 
   // Post-session rating
   const [sessionRating, setSessionRating] = useState(0);
@@ -220,6 +268,43 @@ export default function Interview() {
     if (isFresher) return FRESHER_QUESTIONS;
     const field = expField === 'Other' ? null : expField;
     return EXPERIENCED_QUESTIONS[field] || EXPERIENCED_QUESTIONS.default;
+  };
+
+  const saveCommunicationReport = async (report) => {
+    setReportSaveStatus('');
+
+    if (!isSupabaseConfigured || !supabase) {
+      setReportSaveStatus('Preview generated. Login is required to save it.');
+      return;
+    }
+
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (userError || !user) {
+        setReportSaveStatus('Preview generated. Login is required to save it.');
+        return;
+      }
+
+      const { error } = await supabase.from('communication_reports').insert({
+        user_id: user.id,
+        user_type: tier,
+        target_role: getEffectiveField() || report.profileLabel || 'General interview practice',
+        communication_score: report.communicationScore,
+        clarity_score: report.clarityScore,
+        confidence_score: report.confidenceScore,
+        structure_score: report.structureScore,
+        professional_presence_score: report.professionalPresenceScore,
+        strength: report.topStrength,
+        improvement_area: report.biggestImprovementArea,
+        is_preview: true,
+      });
+
+      setReportSaveStatus(error ? 'Preview shown. Saving will retry after login.' : 'Preview saved to your SiddhiAI account.');
+    } catch (error) {
+      setReportSaveStatus('Preview shown. Saving will retry after login.');
+    }
   };
 
   const pickTier = (selectedTier) => {
@@ -418,10 +503,14 @@ export default function Interview() {
       setQIndex(qIndex + 1);
       setAnswer('');
       setFeedback(null);
+      setCommunicationReport(null);
+      setReportSaveStatus('');
       setStep('practice');
     } else {
-      // Session complete → ask for rating before reset
-      setStep('session_rating');
+      const report = buildCommunicationReport(feedback, isFresher ? 'Fresher interview practice' : getEffectiveField());
+      setCommunicationReport(report);
+      saveCommunicationReport(report);
+      setStep('communication_report');
     }
   };
 
@@ -463,6 +552,8 @@ export default function Interview() {
       setExpOther('');
       setAnswer('');
       setFeedback(null);
+      setCommunicationReport(null);
+      setReportSaveStatus('');
       setSessionRating(0);
       setHoverRating(0);
       setSessionComment('');
@@ -878,6 +969,133 @@ export default function Interview() {
               className="w-full px-6 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition text-base sm:text-lg"
             >
               {qIndex + 1 < getQuestions().length ? 'Next Question →' : 'Complete Session ✓'}
+            </button>
+          </div>
+        )}
+
+        {step === 'communication_report' && communicationReport && (
+          <div>
+            <div className="relative overflow-hidden rounded-2xl bg-siddhi-black text-white p-6 sm:p-8 mb-6 shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-siddhi-saffron/30 via-transparent to-siddhi-gold/25" />
+              <div className="relative">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 border border-white/20 rounded-full text-xs sm:text-sm font-semibold mb-5">
+                  Communication Intelligence Preview
+                </div>
+                <div className="grid md:grid-cols-[1fr_auto] gap-6 items-center">
+                  <div>
+                    <p className="text-white/65 text-sm uppercase tracking-[0.25em] mb-3">
+                      Your interview signal
+                    </p>
+                    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+                      You are closer than you think.
+                    </h2>
+                    <p className="text-white/70 mt-4 max-w-xl">
+                      SiddhiAI analysed your answer for clarity, confidence, structure, and professional presence.
+                    </p>
+                  </div>
+                  <div className="bg-white text-siddhi-black rounded-2xl p-6 text-center shadow-xl min-w-[180px]">
+                    <div className="text-xs uppercase tracking-widest text-siddhi-black/45 mb-2">
+                      Overall Score
+                    </div>
+                    <div className="text-6xl font-bold text-siddhi-saffron">
+                      {communicationReport.communicationScore}
+                    </div>
+                    <div className="text-siddhi-black/50 font-semibold">/100</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {reportSaveStatus && (
+              <div className="mb-5 rounded-lg border border-siddhi-gold/30 bg-siddhi-gold/10 px-4 py-3 text-sm text-siddhi-black/70">
+                {reportSaveStatus}
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              {communicationReport.scoreCards.map((score) => (
+                <div key={score.label} className="bg-white border border-siddhi-black/10 rounded-xl p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <div className="font-display text-lg font-bold">{score.label}</div>
+                      <p className="text-xs text-siddhi-black/55 mt-1">{score.hint}</p>
+                    </div>
+                    <div className="text-2xl font-bold text-siddhi-saffron">{score.value}</div>
+                  </div>
+                  <div className="h-2 bg-siddhi-black/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-siddhi-saffron to-siddhi-gold rounded-full"
+                      style={{ width: `${score.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+                <div className="text-xs uppercase tracking-widest text-green-700 font-bold mb-2">
+                  Top Strength
+                </div>
+                <p className="text-sm sm:text-base text-siddhi-black/80 leading-relaxed">
+                  {communicationReport.topStrength}
+                </p>
+              </div>
+              <div className="bg-siddhi-ivory border border-siddhi-gold/35 rounded-xl p-5">
+                <div className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold mb-2">
+                  Biggest Improvement Area
+                </div>
+                <p className="text-sm sm:text-base text-siddhi-black/80 leading-relaxed">
+                  {communicationReport.biggestImprovementArea}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-siddhi-black/10 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold">
+                    Premium report locked
+                  </p>
+                  <h3 className="font-display text-2xl font-bold mt-1">
+                    Unlock the full Communication Intelligence Report
+                  </h3>
+                </div>
+                <div className="rounded-full border border-siddhi-saffron/30 px-4 py-2 text-sm font-bold text-siddhi-saffron bg-siddhi-saffron/10">
+                  30-Day Access
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                {PREMIUM_REPORT_SECTIONS.map((section) => (
+                  <div
+                    key={section}
+                    className="relative overflow-hidden rounded-lg border border-siddhi-black/10 bg-siddhi-black/[0.03] p-4"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-semibold text-siddhi-black/75">{section}</span>
+                      <span className="text-xs uppercase tracking-wider text-siddhi-black/40 font-bold">Locked</span>
+                    </div>
+                    <div className="mt-3 h-2 w-4/5 rounded bg-siddhi-black/10" />
+                    <div className="mt-2 h-2 w-2/3 rounded bg-siddhi-black/10" />
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/payment"
+                className="block w-full text-center px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-base sm:text-lg"
+              >
+                Unlock Full Communication Intelligence Report
+                <span className="block text-sm font-semibold text-white/85 mt-1">₹499 for 30-Day Access</span>
+              </Link>
+            </div>
+
+            <button
+              onClick={() => setStep('session_rating')}
+              className="w-full px-6 py-4 border-2 border-siddhi-black/15 text-siddhi-black font-semibold rounded-md hover:border-siddhi-saffron hover:text-siddhi-saffron transition"
+            >
+              Continue to session rating
             </button>
           </div>
         )}
