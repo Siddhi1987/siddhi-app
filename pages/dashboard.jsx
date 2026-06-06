@@ -6,19 +6,20 @@ import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 const DASHBOARD_FEATURES = [
   {
     title: 'AI Interview Practice',
-    description: 'Practice access will appear here after Phase 1.',
+    description: 'Start your free interview check and practice focused questions.',
+    href: '/interview',
   },
   {
     title: 'Previous Reports',
-    description: 'Saved reports are not enabled yet.',
+    description: 'Your saved readiness reports will appear here after report storage is enabled.',
   },
   {
     title: 'Communication Score',
-    description: 'Communication score history will be connected later.',
+    description: 'Track clarity, structure, and confidence once reports are connected.',
   },
   {
     title: 'Interview History',
-    description: 'Interview history will be added after report storage is approved.',
+    description: 'Review practice history after the next reporting phase.',
   },
 ];
 
@@ -161,23 +162,38 @@ export default function Dashboard() {
               Unlock SiddhiAI 30-Day Access &#8377;499
             </h2>
             <p className="text-siddhi-black/60 mb-6">
-              Activate access to continue with SiddhiAI interview practice and communication tools.
+              Start with a free interview check, then unlock 30-day access when you are ready for deeper practice.
             </p>
-            <Link
-              href="/payment"
-              className="inline-flex px-6 py-3 rounded-full bg-siddhi-saffron text-white font-bold hover:bg-siddhi-gold transition"
-            >
-              Pay &#8377;499
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/interview"
+                className="inline-flex px-6 py-3 rounded-full bg-siddhi-saffron text-white font-bold hover:bg-siddhi-gold transition justify-center"
+              >
+                Start Free Interview Check
+              </Link>
+              <Link
+                href="/payment"
+                className="inline-flex px-6 py-3 rounded-full border-2 border-siddhi-black text-siddhi-black font-bold hover:bg-siddhi-black hover:text-white transition justify-center"
+              >
+                Unlock 30-Day Access &#8377;499
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-5">
-            {DASHBOARD_FEATURES.map((feature) => (
-              <div key={feature.title} className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
-                <h2 className="font-display text-xl font-bold mb-2">{feature.title}</h2>
-                <p className="text-siddhi-black/60">{feature.description}</p>
-              </div>
-            ))}
+            {DASHBOARD_FEATURES.map((feature) =>
+              feature.href ? (
+                <Link key={feature.title} href={feature.href} className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg hover:border-siddhi-saffron/50 transition">
+                  <h2 className="font-display text-xl font-bold mb-2">{feature.title}</h2>
+                  <p className="text-siddhi-black/60">{feature.description}</p>
+                </Link>
+              ) : (
+                <div key={feature.title} className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
+                  <h2 className="font-display text-xl font-bold mb-2">{feature.title}</h2>
+                  <p className="text-siddhi-black/60">{feature.description}</p>
+                </div>
+              )
+            )}
           </div>
         )}
       </main>
