@@ -27,8 +27,10 @@ export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const [readinessProfile, setReadinessProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subscriptionError, setSubscriptionError] = useState('');
+  const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -52,6 +54,60 @@ export default function Dashboard() {
       }
 
       setUser(currentUser);
+
+      let profileWasSaved = false;
+
+      if (typeof window !== 'undefined') {
+        const storedProfile = window.localStorage.getItem('siddhi_readiness_profile');
+
+        if (storedProfile) {
+          try {
+            const profile = JSON.parse(storedProfile);
+            const { data: savedProfile, error: saveProfileError } = await supabase
+              .from('readiness_profiles')
+              .insert({
+                user_id: currentUser.id,
+                user_type: profile.selectedPath,
+                target_role: profile.targetRole,
+                confidence_level: Number(profile.confidence),
+                biggest_challenge: profile.challenge,
+                linkedin_url: profile.linkedin || null,
+              })
+              .select('user_type,target_role,confidence_level,biggest_challenge,created_at')
+              .single();
+
+            if (!mounted) return;
+
+            if (saveProfileError) {
+              setProfileError('Readiness profile could not be saved yet.');
+            } else {
+              window.localStorage.removeItem('siddhi_readiness_profile');
+              setReadinessProfile(savedProfile);
+              profileWasSaved = true;
+            }
+          } catch (error) {
+            window.localStorage.removeItem('siddhi_readiness_profile');
+          }
+        }
+      }
+
+      if (!profileWasSaved) {
+        const { data: latestProfile, error: latestProfileError } = await supabase
+          .from('readiness_profiles')
+          .select('user_type,target_role,confidence_level,biggest_challenge,created_at')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!mounted) return;
+
+        if (latestProfileError) {
+          setProfileError('Readiness profile could not be loaded yet.');
+        } else {
+          setReadinessProfile(latestProfile || null);
+        }
+      }
 
       const { data, error } = await supabase
         .from('subscriptions')
@@ -140,6 +196,12 @@ export default function Dashboard() {
           </div>
         )}
 
+        {profileError && (
+          <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+            {profileError}
+          </div>
+        )}
+
         <div className="grid md:grid-cols-2 gap-5 mb-8">
           <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
             <p className="text-sm text-siddhi-black/50 mb-2">Subscription status</p>
@@ -152,6 +214,32 @@ export default function Dashboard() {
             <p className="font-display text-3xl font-bold">30-Day Access</p>
           </div>
         </div>
+
+        {readinessProfile && (
+          <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg mb-8">
+            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
+              Interview Readiness Profile
+            </p>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-xs text-siddhi-black/50 mb-1">User type</p>
+                <p className="font-semibold capitalize">{readinessProfile.user_type}</p>
+              </div>
+              <div>
+                <p className="text-xs text-siddhi-black/50 mb-1">Target role</p>
+                <p className="font-semibold">{readinessProfile.target_role}</p>
+              </div>
+              <div>
+                <p className="text-xs text-siddhi-black/50 mb-1">Confidence</p>
+                <p className="font-semibold">{readinessProfile.confidence_level}/5</p>
+              </div>
+              <div>
+                <p className="text-xs text-siddhi-black/50 mb-1">Biggest challenge</p>
+                <p className="font-semibold">{readinessProfile.biggest_challenge}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {!hasActiveSubscription ? (
           <div className="bg-white border border-siddhi-black/10 rounded-2xl p-8 shadow-lg">
