@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import Logo from '../components/Logo';
 
 const PLAN = {
   name: 'SiddhiAI 30-Day Access',
@@ -166,7 +167,7 @@ export default function Payment() {
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black">
       <nav className="border-b border-siddhi-black/10 bg-white">
         <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between">
-          <Link href="/" className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</Link>
+          <Logo />
           <Link href="/dashboard" className="text-sm text-siddhi-black/60 hover:text-siddhi-saffron">Dashboard</Link>
         </div>
       </nav>
