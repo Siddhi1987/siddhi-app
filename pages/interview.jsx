@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import Logo from '../components/Logo';
 
 const FREE_LIMIT = 3;
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
@@ -329,11 +330,7 @@ export default function Interview() {
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black">
       <nav className="border-b border-siddhi-black/10 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
-          <Link href={user ? '/dashboard' : '/'} className="flex items-baseline gap-2">
-            <span className="font-display text-xl sm:text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
-            <span className="font-sanskrit text-sm text-siddhi-gold">सिद्धि</span>
-          </Link>
-
+          <Logo href={user ? '/dashboard' : '/'} />
           <div className="flex items-center gap-3 text-sm">
             {isPaid ? (
               <span className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 font-semibold border border-green-200">
