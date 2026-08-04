@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import Logo from '../components/Logo';
 
 const DASHBOARD_FEATURES = [
   {
@@ -33,33 +34,22 @@ export default function Dashboard() {
   const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
+    let handled = false;
 
-    const loadDashboard = async () => {
-      if (!isSupabaseConfigured) {
-        setLoading(false);
-        return;
-      }
-
-      const {
-        data: { user: currentUser },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (!mounted) return;
-
-      if (userError || !currentUser) {
-        router.replace('/login');
-        return;
-      }
-
+    const hydrate = async (currentUser) => {
+      if (!mounted || handled) return;
+      handled = true;
       setUser(currentUser);
 
       let profileWasSaved = false;
-
       if (typeof window !== 'undefined') {
         const storedProfile = window.localStorage.getItem('siddhi_readiness_profile');
-
         if (storedProfile) {
           try {
             const profile = JSON.parse(storedProfile);
@@ -75,9 +65,7 @@ export default function Dashboard() {
               })
               .select('user_type,target_role,confidence_level,biggest_challenge,created_at')
               .single();
-
             if (!mounted) return;
-
             if (saveProfileError) {
               setProfileError('Readiness profile could not be saved yet.');
             } else {
@@ -99,9 +87,7 @@ export default function Dashboard() {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
-
         if (!mounted) return;
-
         if (latestProfileError) {
           setProfileError('Readiness profile could not be loaded yet.');
         } else {
@@ -109,27 +95,40 @@ export default function Dashboard() {
         }
       }
 
-      const { data, error } = await supabase
+      const { data: sub, error: subError } = await supabase
         .from('subscriptions')
         .select('status,current_period_end')
         .eq('user_id', currentUser.id)
         .eq('status', 'active')
+        .gt('current_period_end', new Date().toISOString())
+        .order('current_period_end', { ascending: false })
+        .limit(1)
         .maybeSingle();
-
       if (!mounted) return;
-
-      if (error) {
+      if (subError) {
         setSubscriptionError('Subscription status could not be loaded yet.');
       }
-
-      setSubscription(data || null);
+      setSubscription(sub || null);
       setLoading(false);
     };
 
-    loadDashboard();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (session?.user) {
+        hydrate(session.user);
+      } else if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+        router.replace('/login');
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (session?.user) hydrate(session.user);
+    });
 
     return () => {
       mounted = false;
+      authListener?.subscription?.unsubscribe();
     };
   }, [router]);
 
@@ -157,10 +156,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black">
       <nav className="border-b border-siddhi-black/10 bg-white">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
-            <span className="font-sanskrit text-siddhi-gold">SiddhiAI</span>
-          </Link>
+          <Logo />
           <button
             type="button"
             onClick={handleLogout}
@@ -170,7 +166,6 @@ export default function Dashboard() {
           </button>
         </div>
       </nav>
-
       <main className="max-w-5xl mx-auto px-6 py-12">
         <div className="mb-10">
           <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
@@ -183,25 +178,21 @@ export default function Dashboard() {
             Account: {user?.email || 'Supabase not configured yet'}
           </p>
         </div>
-
         {!isSupabaseConfigured && (
           <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
             Supabase environment variables are not configured yet. Add the Phase 1 keys to enable login.
           </div>
         )}
-
         {subscriptionError && (
           <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
             {subscriptionError}
           </div>
         )}
-
         {profileError && (
           <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
             {profileError}
           </div>
         )}
-
         <div className="grid md:grid-cols-2 gap-5 mb-8">
           <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
             <p className="text-sm text-siddhi-black/50 mb-2">Subscription status</p>
@@ -214,7 +205,6 @@ export default function Dashboard() {
             <p className="font-display text-3xl font-bold">30-Day Access</p>
           </div>
         </div>
-
         {readinessProfile && (
           <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg mb-8">
             <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
@@ -240,7 +230,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
         {!hasActiveSubscription ? (
           <div className="bg-white border border-siddhi-black/10 rounded-2xl p-8 shadow-lg">
             <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
