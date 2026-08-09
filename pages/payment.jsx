@@ -143,7 +143,11 @@ export default function Payment() {
               throw new Error(verification?.message || 'Verification failed');
             }
 
-            window.location.replace('/dashboard?payment=success');
+            if (verification.hasAccount) {
+     window.location.replace('/dashboard?payment=success');
+   } else {
+     window.location.replace(`/signup?email=${encodeURIComponent(cleanEmail)}&paid=1`);
+   }
           } catch (error) {
             setPaying(false);
             setMessage('Payment was received, but access verification needs attention. Please contact support@siddhiai.in with your payment ID.');
