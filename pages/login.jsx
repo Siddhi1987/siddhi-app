@@ -1,44 +1,60 @@
+// pages/login.jsx — email/password login (primary) + magic-link fallback.
+// Launch-hardening: returning users log in with email + password; magic link stays only as a
+// fallback so paid access never depends on repeated magic-link requests (avoids Supabase rate limits).
+
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState('');
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const redirectTo =
+    typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined;
 
+  const loginWithPassword = async (e) => {
+    e.preventDefault();
     if (!isSupabaseConfigured) {
-      setStatus('Supabase is not configured yet. Please add the Phase 1 environment variables.');
+      setStatus('Supabase is not configured yet.');
       return;
     }
-
     setLoading(true);
     setStatus('');
-
-    const redirectTo =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/dashboard`
-        : process.env.NEXT_PUBLIC_SITE_URL
-          ? `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`
-          : undefined;
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectTo,
-      },
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
     });
-
+    setLoading(false);
     if (error) {
       setStatus(error.message);
     } else {
-      setStatus('Magic link sent. Please check your email to continue.');
+      router.replace('/dashboard');
     }
+  };
 
+  const sendMagicLink = async () => {
+    if (!isSupabaseConfigured) {
+      setStatus('Supabase is not configured yet.');
+      return;
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setStatus('Enter your email above first, then tap "Email me a magic link".');
+      return;
+    }
+    setLoading(true);
+    setStatus('');
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { emailRedirectTo: redirectTo },
+    });
     setLoading(false);
+    setStatus(error ? error.message : 'Magic link sent. Check your email to continue.');
   };
 
   return (
@@ -49,50 +65,40 @@ export default function Login() {
             <span className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
             <span className="font-sanskrit text-siddhi-gold">सिद्धि</span>
           </Link>
-          <Link href="/interview" className="text-sm text-siddhi-black/60 hover:text-siddhi-saffron">
-            Back to coach
-          </Link>
+          <Link href="/interview" className="text-sm text-siddhi-black/60 hover:text-siddhi-saffron">Try free tool</Link>
         </div>
       </nav>
-
       <main className="max-w-xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
-          <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-            Member Login
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-            Continue with email
-          </h1>
-          <p className="text-siddhi-black/60">
-            Get a secure magic link. No password is required in Phase 1.
-          </p>
+          <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Member Login</p>
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">Welcome back</h1>
+          <p className="text-siddhi-black/60">Log in to your practice workspace.</p>
         </div>
 
-        <form onSubmit={handleLogin} className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
-          <label className="block text-sm font-semibold mb-2">Email address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            required
-            className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
-          />
+        <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-lg">
+          <form onSubmit={loginWithPassword} className="space-y-4">
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@email.com" className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
+            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Password" className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
+            <button type="submit" disabled={loading} className="w-full px-6 py-3 rounded-full bg-siddhi-saffron text-white font-bold hover:bg-siddhi-gold transition disabled:opacity-60">
+              {loading ? 'Logging in…' : 'Login'}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-5 px-6 py-3 rounded-full bg-siddhi-saffron text-white font-bold hover:bg-siddhi-gold transition disabled:opacity-60"
-          >
-            {loading ? 'Sending...' : 'Send magic link'}
-          </button>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <button type="button" onClick={sendMagicLink} className="font-semibold text-siddhi-black/60 hover:text-siddhi-saffron">
+              Email me a magic link
+            </button>
+            <Link href="/signup" className="font-semibold text-siddhi-saffron hover:underline">
+              Create an account
+            </Link>
+          </div>
 
           {status && (
             <div className="mt-4 rounded-lg border border-siddhi-black/10 bg-siddhi-ivory p-4 text-sm text-siddhi-black/75">
               {status}
             </div>
           )}
-        </form>
+        </div>
       </main>
     </div>
   );

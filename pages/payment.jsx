@@ -136,17 +136,17 @@ export default function Payment() {
               throw new Error(verification?.message || 'Payment verification failed');
             }
 
-            const dashboardParams = new URLSearchParams({
-              access: 'active',
-              name: cleanName,
-              email: cleanEmail,
-              phone: cleanPhone,
-              payment_id: response.razorpay_payment_id,
-              order_id: response.razorpay_order_id,
-              plan: PLAN.name,
-            });
-
-            window.location.href = `/dashboard?${dashboardParams.toString()}`;
+            // Access is granted by the verified backend event (subscription activated
+            // server-side in verify-payment), never by this redirect. Route by whether an
+            // account already exists for this email:
+            //  - existing account -> dashboard (subscription now active)
+            //  - new buyer         -> signup, with the paid email prefilled + locked so the
+            //    claim trigger links the subscription to the new account by matching email.
+            if (verification.hasAccount) {
+              window.location.replace('/dashboard?payment=success');
+            } else {
+              window.location.replace(`/signup?email=${encodeURIComponent(cleanEmail)}&paid=1`);
+            }
           } catch (error) {
             console.error('Verification error:', error);
             setLoading(false);
