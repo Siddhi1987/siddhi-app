@@ -79,6 +79,7 @@ export default function Login() {
           <form onSubmit={loginWithPassword} className="space-y-4">
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@email.com" className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
             <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Password" className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
+            <a href="/forgot-password" className="block text-right text-sm text-siddhi-saffron underline">Forgot password?</a>
             <button type="submit" disabled={loading} className="w-full px-6 py-3 rounded-full bg-siddhi-saffron text-white font-bold hover:bg-siddhi-gold transition disabled:opacity-60">
               {loading ? 'Logging in…' : 'Login'}
             </button>
