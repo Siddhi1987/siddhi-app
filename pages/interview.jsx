@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 // =================== DROPDOWN OPTIONS ===================
@@ -234,6 +234,24 @@ export default function Interview() {
   const [userName, setUserName] = useState('');
   const [userMobile, setUserMobile] = useState('');
   const [userEmail, setUserEmail] = useState('');
+    const [hasPaid, setHasPaid] = useState(false);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .gt('current_period_end', new Date().toISOString())
+        .limit(1)
+        .maybeSingle();
+      if (data) setHasPaid(true);
+    })();
+  }, []);
   const [registered, setRegistered] = useState(false);
 
   const [gradField, setGradField] = useState('');
@@ -308,7 +326,7 @@ export default function Interview() {
   };
 
   const pickTier = (selectedTier) => {
-    if (sessionsUsed >= FREE_LIMIT) {
+    if (!hasPaid && sessionsUsed >= FREE_LIMIT) {
       setStep('limit');
       return;
     }
@@ -571,7 +589,7 @@ export default function Interview() {
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="text-xs text-siddhi-black/60 hidden sm:inline">
-              Free: <strong>{FREE_LIMIT - sessionsUsed}/{FREE_LIMIT}</strong>
+              {hasPaid ? <strong className="text-siddhi-saffron">Pro · Active</strong> : <>Free: <strong>{FREE_LIMIT - sessionsUsed}/{FREE_LIMIT}</strong></>}
             </span>
             <Link
               href="/payment"
