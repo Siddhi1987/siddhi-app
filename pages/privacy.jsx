@@ -1,6 +1,7 @@
 export default function Privacy() {
   return (
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black px-6 py-16 max-w-3xl mx-auto">
+      <a href="/" className="text-sm text-siddhi-saffron underline mb-6 inline-block">← Back home</a>
       <h1 className="font-display text-4xl font-bold text-siddhi-saffron mb-2">Privacy Policy</h1>
       <p className="text-sm text-gray-500 mb-8">Last updated: May 2026</p>
 
