@@ -109,11 +109,18 @@ export default function Dashboard() {
         }
       }
 
+      // Pick the newest, NON-EXPIRED active subscription.
+      // .limit(1) before .maybeSingle() so multiple active rows (e.g. repeat
+      // purchases) never throw "more than one row"; .gt() ignores expired rows
+      // still flagged active in the DB.
       const { data, error } = await supabase
         .from('subscriptions')
         .select('status,current_period_end')
         .eq('user_id', currentUser.id)
         .eq('status', 'active')
+        .gt('current_period_end', new Date().toISOString())
+        .order('current_period_end', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (!mounted) return;
@@ -159,7 +166,7 @@ export default function Dashboard() {
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-baseline gap-2">
             <span className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
-            <span className="font-sanskrit text-siddhi-gold">SiddhiAI</span>
+            <span className="font-sanskrit text-siddhi-gold">सिद्धि</span>
           </Link>
           <button
             type="button"
