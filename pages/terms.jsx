@@ -1,6 +1,7 @@
 export default function Terms() {
   return (
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black px-6 py-16 max-w-3xl mx-auto">
+      <a href="/" className="text-sm text-siddhi-saffron underline mb-6 inline-block">← Back home</a>
       <h1 className="font-display text-4xl font-bold text-siddhi-saffron mb-2">Terms & Conditions</h1>
       <p className="text-sm text-gray-500 mb-8">Last updated: May 2026</p>
 
@@ -32,7 +33,7 @@ export default function Terms() {
 
         <section>
           <h2 className="font-display text-2xl font-semibold mb-2">6. Governing Law</h2>
-          <p>These terms are governed by the laws of India. Disputes shall be resolved in courts of [Your City], India.</p>
+          <p>These terms are governed by the laws of India. Disputes shall be resolved in courts of Nagpur, India.</p>
         </section>
 
         <section>
