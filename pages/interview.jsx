@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
-
 // =================== DROPDOWN OPTIONS ===================
 const GRADUATION_FIELDS = [
   'B.Tech / B.E. (Engineering)',
@@ -20,7 +19,6 @@ const GRADUATION_FIELDS = [
   'Fashion / Design',
   'Other',
 ];
-
 const POST_GRADUATION_FIELDS = [
   'None / Not pursuing',
   'MBA / PGDM',
@@ -35,7 +33,6 @@ const POST_GRADUATION_FIELDS = [
   'Currently pursuing',
   'Other',
 ];
-
 const EXPERIENCED_FIELDS = [
   'Product Manager',
   'Software Engineer / Developer',
@@ -50,13 +47,11 @@ const EXPERIENCED_FIELDS = [
   'Customer Support / Success',
   'Other',
 ];
-
 const FRESHER_QUESTIONS = [
   'Tell me about yourself.',
   'Walk me through a project from your studies that you are most proud of.',
   'What is your biggest strength, and how did you develop it?',
 ];
-
 const EXPERIENCED_QUESTIONS = {
   'Product Manager': [
     'Walk me through the most impactful product you shipped. What was the measurable outcome?',
@@ -84,7 +79,6 @@ const EXPERIENCED_QUESTIONS = {
     'Tell me about a time you failed. What did you learn, and what would you do differently?',
   ],
 };
-
 const FREE_LIMIT = 3;
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
 const PREMIUM_REPORT_SECTIONS = [
@@ -94,9 +88,7 @@ const PREMIUM_REPORT_SECTIONS = [
   'Career Growth Roadmap',
   'Personalized Recommendations',
 ];
-
 const clampScore = (score) => Math.max(35, Math.min(96, Math.round(score)));
-
 const buildCommunicationReport = (feedback, profileLabel) => {
   const clarityScore = clampScore(feedback.clarity);
   const structureScore = clampScore(feedback.structure);
@@ -114,7 +106,6 @@ const buildCommunicationReport = (feedback, profileLabel) => {
   const biggestImprovementArea = firstImprovement
     ? `${firstImprovement.title.replace(/[^\w\s:.-]/g, '').trim()}: ${firstImprovement.detail}`
     : 'Add one specific example with measurable outcome to make your answer more convincing.';
-
   return {
     profileLabel,
     communicationScore,
@@ -132,25 +123,20 @@ const buildCommunicationReport = (feedback, profileLabel) => {
     ],
   };
 };
-
 // =================== SEARCHABLE DROPDOWN COMPONENT ===================
 function SearchableDropdown({ label, options, value, onChange, otherValue, onOtherChange, required, placeholder }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-
   const filtered = useMemo(
     () => options.filter((opt) => opt.toLowerCase().includes(search.toLowerCase())),
     [search, options]
   );
-
   const isOther = value === 'Other';
-
   return (
     <div>
       <label className="block text-sm font-semibold mb-2">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-
       <div className="relative">
         <button
           type="button"
@@ -164,7 +150,6 @@ function SearchableDropdown({ label, options, value, onChange, otherValue, onOth
           </span>
           <span className="text-siddhi-black/40 text-sm">{open ? '▲' : '▼'}</span>
         </button>
-
         {open && (
           <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border-2 border-siddhi-saffron/30 rounded-lg shadow-xl max-h-72 overflow-hidden flex flex-col">
             <div className="p-2 border-b border-siddhi-black/10 sticky top-0 bg-white">
@@ -177,7 +162,6 @@ function SearchableDropdown({ label, options, value, onChange, otherValue, onOth
                 className="w-full p-2 border border-siddhi-black/15 rounded-md focus:border-siddhi-saffron focus:outline-none text-sm"
               />
             </div>
-
             <div className="overflow-y-auto flex-1">
               {filtered.length === 0 ? (
                 <div className="p-3 text-sm text-siddhi-black/50 text-center">
@@ -205,7 +189,6 @@ function SearchableDropdown({ label, options, value, onChange, otherValue, onOth
           </div>
         )}
       </div>
-
       {isOther && (
         <div className="mt-3">
           <input
@@ -224,23 +207,48 @@ function SearchableDropdown({ label, options, value, onChange, otherValue, onOth
     </div>
   );
 }
-
 // =================== MAIN COMPONENT ===================
 export default function Interview() {
   const [step, setStep] = useState('register');
   const [tier, setTier] = useState(null);
-
   // User registration (mandatory)
   const [userName, setUserName] = useState('');
   const [userMobile, setUserMobile] = useState('');
   const [userEmail, setUserEmail] = useState('');
-    const [hasPaid, setHasPaid] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [gradField, setGradField] = useState('');
+  const [gradOther, setGradOther] = useState('');
+  const [pgField, setPgField] = useState('None / Not pursuing');
+  const [pgOther, setPgOther] = useState('');
+  const [expField, setExpField] = useState('');
+  const [expOther, setExpOther] = useState('');
+  const [qIndex, setQIndex] = useState(0);
+  const [answer, setAnswer] = useState('');
+  const [sessionsUsed, setSessionsUsed] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [communicationReport, setCommunicationReport] = useState(null);
+  const [reportSaveStatus, setReportSaveStatus] = useState('');
+  // Post-session rating
+  const [sessionRating, setSessionRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [sessionComment, setSessionComment] = useState('');
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  // Paid / logged-in awareness
+  const [hasPaid, setHasPaid] = useState(false);
 
+  // On load: if the visitor is logged in, prefill their details, skip the
+  // guest "register" step, and check whether they have an active paid plan.
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
+    let active = true;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!active || !user) return;
+      if (user.email) setUserEmail(user.email);
+      const metaName = user.user_metadata?.full_name || user.user_metadata?.name;
+      if (metaName) setUserName(metaName);
+      setRegistered(true);
+      setStep((s) => (s === 'register' ? 'select_tier' : s));
       const { data } = await supabase
         .from('subscriptions')
         .select('status')
@@ -249,62 +257,34 @@ export default function Interview() {
         .gt('current_period_end', new Date().toISOString())
         .limit(1)
         .maybeSingle();
-      if (data) setHasPaid(true);
+      if (active && data) setHasPaid(true);
     })();
+    return () => { active = false; };
   }, []);
-  const [registered, setRegistered] = useState(false);
-
-  const [gradField, setGradField] = useState('');
-  const [gradOther, setGradOther] = useState('');
-  const [pgField, setPgField] = useState('None / Not pursuing');
-  const [pgOther, setPgOther] = useState('');
-
-  const [expField, setExpField] = useState('');
-  const [expOther, setExpOther] = useState('');
-
-  const [qIndex, setQIndex] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [sessionsUsed, setSessionsUsed] = useState(0);
-  const [feedback, setFeedback] = useState(null);
-  const [communicationReport, setCommunicationReport] = useState(null);
-  const [reportSaveStatus, setReportSaveStatus] = useState('');
-
-  // Post-session rating
-  const [sessionRating, setSessionRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [sessionComment, setSessionComment] = useState('');
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   const isFresher = tier === 'fresher';
-
   const getEffectiveField = () => {
     if (!isFresher) return expField === 'Other' ? expOther : expField;
     return gradField === 'Other' ? gradOther : gradField;
   };
-
   const getQuestions = () => {
     if (isFresher) return FRESHER_QUESTIONS;
     const field = expField === 'Other' ? null : expField;
     return EXPERIENCED_QUESTIONS[field] || EXPERIENCED_QUESTIONS.default;
   };
-
   const saveCommunicationReport = async (report) => {
     setReportSaveStatus('');
-
     if (!isSupabaseConfigured || !supabase) {
       setReportSaveStatus('Preview generated. Login is required to save it.');
       return;
     }
-
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       const user = userData?.user;
-
       if (userError || !user) {
         setReportSaveStatus('Preview generated. Login is required to save it.');
         return;
       }
-
       const { error } = await supabase.from('communication_reports').insert({
         user_id: user.id,
         user_type: tier,
@@ -318,13 +298,11 @@ export default function Interview() {
         improvement_area: report.biggestImprovementArea,
         is_preview: true,
       });
-
       setReportSaveStatus(error ? 'Preview shown. Saving will retry after login.' : 'Preview saved to your SiddhiAI account.');
     } catch (error) {
       setReportSaveStatus('Preview shown. Saving will retry after login.');
     }
   };
-
   const pickTier = (selectedTier) => {
     if (!hasPaid && sessionsUsed >= FREE_LIMIT) {
       setStep('limit');
@@ -333,7 +311,6 @@ export default function Interview() {
     setTier(selectedTier);
     setStep('fill_details');
   };
-
   const canProceed = () => {
     if (isFresher) {
       if (!gradField) return false;
@@ -345,13 +322,11 @@ export default function Interview() {
     if (expField === 'Other' && !expOther.trim()) return false;
     return true;
   };
-
   const startPractice = () => {
     if (!canProceed()) {
       alert('Please complete the required fields.');
       return;
     }
-
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -368,12 +343,10 @@ export default function Interview() {
         _subject: `Interview Start: ${userName} (${tier} - ${getEffectiveField()})`,
       }),
     }).catch(() => {});
-
     setQIndex(0);
     setAnswer('');
     setStep('practice');
   };
-
   const submitAnswer = () => {
     if (answer.trim().length < 20) {
       alert('Please give a more detailed answer (at least 20 characters).');
@@ -385,10 +358,8 @@ export default function Interview() {
     const hasNumbers = /\d+/.test(answer);
     const hasIChange = /\bI\s+(led|built|shipped|launched|owned|drove|managed)\b/i.test(answer);
     const startsWithSituation = /^(in my|at my|during|when i|while)/i.test(answer.trim());
-
     // Detailed improvement engine — gives specific, actionable feedback
     const improvements = [];
-
     if (isFresher) {
       // FRESHER detailed feedback
       if (wordCount < 50) {
@@ -403,7 +374,6 @@ export default function Interview() {
           detail: `${wordCount} words is too long. Interviewers lose focus after 90 seconds. Cut the middle 30% — keep your strongest opening + sharpest closing.`,
         });
       }
-
       if (fillerWords > 2) {
         improvements.push({
           title: `🗣️ ${fillerWords} filler words detected`,
@@ -411,7 +381,6 @@ export default function Interview() {
           example: 'Try this: Record yourself answering for 60 seconds. Count fillers. Re-record until under 2.',
         });
       }
-
       if (!startsWithSituation && wordCount > 30) {
         improvements.push({
           title: '📐 Use STAR format',
@@ -419,7 +388,6 @@ export default function Interview() {
           example: '"In my final semester (Situation), I had to organize the tech fest (Task). I led a team of 8 and managed ₹5L budget (Action). We had 400+ attendees and made ₹50k profit (Result)."',
         });
       }
-
       if (!hasNumbers) {
         improvements.push({
           title: '🔢 Add specific numbers',
@@ -427,7 +395,6 @@ export default function Interview() {
           example: 'Weak: "I improved the website." Strong: "I improved the website load time by 40% over 2 weeks."',
         });
       }
-
       // Always include at least one positive next step
       if (improvements.length === 0) {
         improvements.push({
@@ -449,7 +416,6 @@ export default function Interview() {
           detail: `${wordCount} words is too long. Senior interviewers test if you can be concise under pressure. Cut by 30% and lead with the BIGGEST impact first.`,
         });
       }
-
       if (!hasIChange) {
         improvements.push({
           title: '👤 Use "I" not "We"',
@@ -457,7 +423,6 @@ export default function Interview() {
           example: 'Weak: "We launched the product." Strong: "I owned the GTM strategy and led the launch — partnered with marketing, set up analytics, ran the post-launch retro."',
         });
       }
-
       if (!hasNumbers) {
         improvements.push({
           title: '🔢 No measurable impact mentioned',
@@ -465,21 +430,18 @@ export default function Interview() {
           example: '"My change reduced API latency from 800ms to 120ms — saving the team 15 hours/week of customer escalations."',
         });
       }
-
       if (fillerWords > 2) {
         improvements.push({
           title: `🗣️ Executive presence dropped — ${fillerWords} fillers`,
           detail: `At your level, filler words ("um/uh/basically/actually") cost you executive presence. Senior interviewers notice this. Replace with confident silence — pause 1 second instead.`,
         });
       }
-
       if (sentences > 0 && wordCount / sentences > 35) {
         improvements.push({
           title: '✂️ Sentences too long',
           detail: 'Your average sentence had ' + Math.round(wordCount / sentences) + ' words. Interviewers lose track after 25-word sentences. Break long thoughts into 2-3 punchy sentences.',
         });
       }
-
       if (improvements.length === 0) {
         improvements.push({
           title: '🚀 Polish for top-tier interviews',
@@ -487,10 +449,8 @@ export default function Interview() {
         });
       }
     }
-
     // Limit to top 3 most relevant improvements
     const topImprovements = improvements.slice(0, 3);
-
     setFeedback({
       clarity: Math.min(95, 60 + wordCount * 0.4 - fillerWords * 3),
       structure: wordCount > 80 ? 88 : wordCount > 40 ? 72 : 55,
@@ -514,7 +474,6 @@ export default function Interview() {
     setSessionsUsed((n) => n + 1);
     setStep('feedback');
   };
-
   const nextQuestion = () => {
     const qs = getQuestions();
     if (qIndex + 1 < qs.length) {
@@ -531,13 +490,11 @@ export default function Interview() {
       setStep('communication_report');
     }
   };
-
   const submitSessionRating = () => {
     if (sessionRating < 1) {
       alert('Please rate your session before continuing.');
       return;
     }
-
     // Send rating + optional comment to Formspree
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
@@ -555,9 +512,7 @@ export default function Interview() {
         _subject: `Session Rating: ${userName} (${sessionRating}/5)`,
       }),
     }).catch(() => {});
-
     setRatingSubmitted(true);
-
     // After short delay, reset to tier selection
     setTimeout(() => {
       setStep('select_tier');
@@ -578,7 +533,6 @@ export default function Interview() {
       setRatingSubmitted(false);
     }, 2500);
   };
-
   return (
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black">
       <nav className="border-b border-siddhi-black/10 bg-white">
@@ -591,18 +545,18 @@ export default function Interview() {
             <span className="text-xs text-siddhi-black/60 hidden sm:inline">
               {hasPaid ? <strong className="text-siddhi-saffron">Pro · Active</strong> : <>Free: <strong>{FREE_LIMIT - sessionsUsed}/{FREE_LIMIT}</strong></>}
             </span>
-            <Link
-              href="/payment"
-              className="px-3 sm:px-4 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition whitespace-nowrap"
-            >
-              Upgrade Pro
-            </Link>
+            {!hasPaid && (
+              <Link
+                href="/payment"
+                className="px-3 sm:px-4 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition whitespace-nowrap"
+              >
+                Upgrade Pro
+              </Link>
+            )}
           </div>
         </div>
       </nav>
-
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-
         {/* ============ STEP 0: REGISTRATION (MANDATORY) ============ */}
         {step === 'register' && (
           <div>
@@ -617,7 +571,6 @@ export default function Interview() {
                 We need a few details before you begin. We use this only to send you your interview report and product updates.
               </p>
             </div>
-
             <div className="bg-white border border-siddhi-black/10 rounded-xl p-5 sm:p-7 space-y-5 shadow-sm">
               <div>
                 <label className="block text-sm font-semibold mb-2">
@@ -631,7 +584,6 @@ export default function Interview() {
                   className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-semibold mb-2">
                   Mobile number <span className="text-red-500">*</span>
@@ -646,7 +598,6 @@ export default function Interview() {
                 />
                 <p className="text-xs text-siddhi-black/50 mt-1">10-digit number (India). We never call you — only WhatsApp updates.</p>
               </div>
-
               <div>
                 <label className="block text-sm font-semibold mb-2">
                   Email address <span className="text-red-500">*</span>
@@ -660,24 +611,20 @@ export default function Interview() {
                 />
                 <p className="text-xs text-siddhi-black/50 mt-1">We send your interview score report here.</p>
               </div>
-
               <div className="text-xs text-siddhi-black/55 bg-siddhi-ivory/50 border border-siddhi-gold/20 rounded-lg p-3">
                 🔒 Your details are private. We don't sell data. Read our{' '}
                 <Link href="/privacy" className="underline text-siddhi-saffron">privacy policy</Link>.
               </div>
             </div>
-
             <button
               onClick={() => {
                 const nameOk = userName.trim().length >= 2;
                 const mobileDigits = userMobile.replace(/\D/g, '');
                 const mobileOk = mobileDigits.length >= 10 && mobileDigits.length <= 15;
                 const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.trim());
-
                 if (!nameOk) { alert('Please enter your name (at least 2 characters).'); return; }
                 if (!mobileOk) { alert('Please enter a valid mobile number (at least 10 digits).'); return; }
                 if (!emailOk) { alert('Please enter a valid email address.'); return; }
-
                 // Send registration to Formspree silently
                 fetch(FORMSPREE_ENDPOINT, {
                   method: 'POST',
@@ -691,7 +638,6 @@ export default function Interview() {
                     _subject: `New SIDDHI signup: ${userName.trim()}`,
                   }),
                 }).catch(() => {});
-
                 setRegistered(true);
                 setStep('select_tier');
               }}
@@ -699,13 +645,11 @@ export default function Interview() {
             >
               Continue →
             </button>
-
             <p className="text-xs text-siddhi-black/50 text-center mt-3">
               By continuing, you agree to receive interview reports and product updates.
             </p>
           </div>
         )}
-
         {step === 'select_tier' && (
           <div>
             <div className="text-center mb-8 sm:mb-10">
@@ -719,7 +663,6 @@ export default function Interview() {
                 We'll tailor your interview questions based on where you are in your journey.
               </p>
             </div>
-
             <div className="grid sm:grid-cols-2 gap-4">
               <button
                 onClick={() => pickTier('fresher')}
@@ -736,7 +679,6 @@ export default function Interview() {
                   Recent grad, internships, first job hunt, campus placements.
                 </p>
               </button>
-
               <button
                 onClick={() => pickTier('experienced')}
                 className="p-6 sm:p-8 bg-white border-2 border-siddhi-black/10 rounded-xl hover:border-siddhi-saffron hover:shadow-xl transition text-left group"
@@ -753,8 +695,7 @@ export default function Interview() {
                 </p>
               </button>
             </div>
-
-            {sessionsUsed > 0 && (
+            {sessionsUsed > 0 && !hasPaid && (
               <div className="mt-8 p-4 bg-siddhi-gold/10 border border-siddhi-gold/30 rounded-lg text-center text-sm">
                 You've completed <strong>{sessionsUsed}</strong> free session
                 {sessionsUsed > 1 ? 's' : ''}.{' '}
@@ -765,7 +706,6 @@ export default function Interview() {
             )}
           </div>
         )}
-
         {step === 'fill_details' && tier && (
           <div>
             <div className="mb-6 flex items-center justify-between text-sm">
@@ -779,7 +719,6 @@ export default function Interview() {
                 {isFresher ? '🌱 Fresher' : '🚀 Experienced'}
               </span>
             </div>
-
             <div className="text-center mb-8">
               <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
                 Step 2 of 2
@@ -793,7 +732,6 @@ export default function Interview() {
                   : "Pick your field. Don't see it? Choose 'Other' and we'll tailor for you."}
               </p>
             </div>
-
             <div className="bg-white border border-siddhi-black/10 rounded-xl p-5 sm:p-6 space-y-5">
               {isFresher ? (
                 <>
@@ -831,7 +769,6 @@ export default function Interview() {
                 />
               )}
             </div>
-
             <button
               onClick={startPractice}
               disabled={!canProceed()}
@@ -839,13 +776,11 @@ export default function Interview() {
             >
               Start practice →
             </button>
-
             <p className="text-xs text-siddhi-black/50 text-center mt-3">
               3 questions · ~10 minutes · Free to try
             </p>
           </div>
         )}
-
         {step === 'practice' && tier && (
           <div>
             <div className="mb-6 flex items-center justify-between text-sm gap-2">
@@ -864,7 +799,6 @@ export default function Interview() {
                 ← Restart
               </button>
             </div>
-
             <div className="bg-white border-2 border-siddhi-saffron/30 rounded-lg p-6 sm:p-8 mb-6">
               <div className="text-xs uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
                 Question
@@ -873,7 +807,6 @@ export default function Interview() {
                 {getQuestions()[qIndex]}
               </p>
             </div>
-
             <div>
               <label className="block text-sm font-semibold mb-2">Your answer</label>
               <textarea
@@ -898,7 +831,6 @@ export default function Interview() {
             </div>
           </div>
         )}
-
         {step === 'feedback' && feedback && (
           <div>
             <div className="text-center mb-8">
@@ -907,7 +839,6 @@ export default function Interview() {
               </div>
               <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">Your feedback</h2>
             </div>
-
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
               <div className="bg-white p-4 sm:p-6 rounded-lg border border-siddhi-black/10">
                 <div className="text-xs uppercase tracking-widest text-siddhi-black/50 mb-2">Clarity</div>
@@ -924,7 +855,6 @@ export default function Interview() {
                 </div>
               </div>
             </div>
-
             <div className="bg-white border border-siddhi-black/10 rounded-lg p-5 sm:p-6 mb-4">
               <h3 className="font-display text-lg font-bold mb-3 text-green-700">✓ Strengths</h3>
               <ul className="space-y-2 text-sm">
@@ -936,7 +866,6 @@ export default function Interview() {
                 ))}
               </ul>
             </div>
-
             <div className="bg-white border border-siddhi-black/10 rounded-lg p-5 sm:p-6 mb-6">
               <h3 className="font-display text-lg font-bold mb-4 text-siddhi-saffron">→ How to improve (specific actions)</h3>
               <div className="space-y-4">
@@ -953,7 +882,6 @@ export default function Interview() {
                   </div>
                 ))}
               </div>
-
               {/* Stats footer */}
               <div className="mt-5 pt-4 border-t border-siddhi-black/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div className="text-center">
@@ -974,14 +902,12 @@ export default function Interview() {
                 </div>
               </div>
             </div>
-
             <div className="bg-siddhi-gold/10 border border-siddhi-gold/30 rounded-lg p-4 mb-6 text-sm">
               <strong>Pro unlocks:</strong> Personalized coaching, deep voice analysis, 50+ role-specific question banks, and early access to Negotiate / Speak / Lead.{' '}
               <Link href="/payment" className="text-siddhi-saffron font-semibold underline">
                 Try Pro
               </Link>
             </div>
-
             <button
               onClick={nextQuestion}
               className="w-full px-6 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition text-base sm:text-lg"
@@ -990,7 +916,6 @@ export default function Interview() {
             </button>
           </div>
         )}
-
         {step === 'communication_report' && communicationReport && (
           <div>
             <div className="relative overflow-hidden rounded-2xl bg-siddhi-black text-white p-6 sm:p-8 mb-6 shadow-2xl">
@@ -1023,13 +948,11 @@ export default function Interview() {
                 </div>
               </div>
             </div>
-
             {reportSaveStatus && (
               <div className="mb-5 rounded-lg border border-siddhi-gold/30 bg-siddhi-gold/10 px-4 py-3 text-sm text-siddhi-black/70">
                 {reportSaveStatus}
               </div>
             )}
-
             <div className="grid sm:grid-cols-2 gap-4 mb-6">
               {communicationReport.scoreCards.map((score) => (
                 <div key={score.label} className="bg-white border border-siddhi-black/10 rounded-xl p-5 shadow-sm">
@@ -1049,7 +972,6 @@ export default function Interview() {
                 </div>
               ))}
             </div>
-
             <div className="grid md:grid-cols-2 gap-4 mb-6">
               <div className="bg-green-50 border border-green-200 rounded-xl p-5">
                 <div className="text-xs uppercase tracking-widest text-green-700 font-bold mb-2">
@@ -1068,47 +990,57 @@ export default function Interview() {
                 </p>
               </div>
             </div>
-
             <div className="bg-white border border-siddhi-black/10 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold">
-                    Premium report locked
+                    {hasPaid ? 'Full report' : 'Premium report locked'}
                   </p>
                   <h3 className="font-display text-2xl font-bold mt-1">
-                    Unlock the full Communication Intelligence Report
+                    {hasPaid ? 'Your Communication Intelligence Report' : 'Unlock the full Communication Intelligence Report'}
                   </h3>
                 </div>
                 <div className="rounded-full border border-siddhi-saffron/30 px-4 py-2 text-sm font-bold text-siddhi-saffron bg-siddhi-saffron/10">
-                  30-Day Access
+                  {hasPaid ? 'Pro · Active' : '30-Day Access'}
                 </div>
               </div>
-
-              <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                {PREMIUM_REPORT_SECTIONS.map((section) => (
-                  <div
-                    key={section}
-                    className="relative overflow-hidden rounded-lg border border-siddhi-black/10 bg-siddhi-black/[0.03] p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold text-siddhi-black/75">{section}</span>
-                      <span className="text-xs uppercase tracking-wider text-siddhi-black/40 font-bold">Locked</span>
-                    </div>
-                    <div className="mt-3 h-2 w-4/5 rounded bg-siddhi-black/10" />
-                    <div className="mt-2 h-2 w-2/3 rounded bg-siddhi-black/10" />
+              {!hasPaid && (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                    {PREMIUM_REPORT_SECTIONS.map((section) => (
+                      <div
+                        key={section}
+                        className="relative overflow-hidden rounded-lg border border-siddhi-black/10 bg-siddhi-black/[0.03] p-4"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-semibold text-siddhi-black/75">{section}</span>
+                          <span className="text-xs uppercase tracking-wider text-siddhi-black/40 font-bold">Locked</span>
+                        </div>
+                        <div className="mt-3 h-2 w-4/5 rounded bg-siddhi-black/10" />
+                        <div className="mt-2 h-2 w-2/3 rounded bg-siddhi-black/10" />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-
-              <Link
-                href="/payment"
-                className="block w-full text-center px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-base sm:text-lg"
-              >
-                Unlock Full Communication Intelligence Report
-                <span className="block text-sm font-semibold text-white/85 mt-1">₹499 for 30-Day Access</span>
-              </Link>
+                  <Link
+                    href="/payment"
+                    className="block w-full text-center px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-base sm:text-lg"
+                  >
+                    Unlock Full Communication Intelligence Report
+                    <span className="block text-sm font-semibold text-white/85 mt-1">₹499 for 30-Day Access</span>
+                  </Link>
+                </>
+              )}
+              {hasPaid && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {PREMIUM_REPORT_SECTIONS.map((section) => (
+                    <div key={section} className="rounded-lg border border-siddhi-gold/30 bg-siddhi-gold/5 p-4">
+                      <span className="font-semibold text-siddhi-black/80">{section}</span>
+                      <p className="text-xs text-siddhi-black/55 mt-1">Included with your Pro access.</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
             <button
               onClick={() => setStep('session_rating')}
               className="w-full px-6 py-4 border-2 border-siddhi-black/15 text-siddhi-black font-semibold rounded-md hover:border-siddhi-saffron hover:text-siddhi-saffron transition"
@@ -1117,7 +1049,6 @@ export default function Interview() {
             </button>
           </div>
         )}
-
         {/* ============ STEP: SESSION RATING (MANDATORY) ============ */}
         {step === 'session_rating' && (
           <div>
@@ -1135,7 +1066,6 @@ export default function Interview() {
                     Your rating helps us improve SIDDHI for the next person.
                   </p>
                 </div>
-
                 <div className="bg-white border border-siddhi-black/10 rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
                   {/* Star rating */}
                   <div>
@@ -1173,7 +1103,6 @@ export default function Interview() {
                       </p>
                     )}
                   </div>
-
                   {/* Optional comment */}
                   <div>
                     <label className="block text-sm font-semibold mb-2">
@@ -1191,7 +1120,6 @@ export default function Interview() {
                     </p>
                   </div>
                 </div>
-
                 <button
                   onClick={submitSessionRating}
                   disabled={sessionRating < 1}
@@ -1199,7 +1127,6 @@ export default function Interview() {
                 >
                   Submit rating →
                 </button>
-
                 <p className="text-xs text-siddhi-black/50 text-center mt-3">
                   Required to complete your session.
                 </p>
@@ -1217,7 +1144,6 @@ export default function Interview() {
             )}
           </div>
         )}
-
         {step === 'limit' && (
           <div className="text-center py-12">
             <div className="text-6xl mb-6">🎯</div>
