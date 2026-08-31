@@ -1,10 +1,25 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => { if (active) setAuthed(Boolean(data?.user)); });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthed(Boolean(session?.user));
+    });
+    return () => { active = false; sub?.subscription?.unsubscribe?.(); };
+  }, []);
+  const handleLogout = async () => {
+    if (supabase) { try { await supabase.auth.signOut(); } catch (e) {} }
+    setAuthed(false);
+  };
   const [modalModule, setModalModule] = useState(null);
   const [modalEmail, setModalEmail] = useState('');
   const [modalName, setModalName] = useState('');
@@ -161,9 +176,23 @@ export default function Home() {
           <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
             <a href="#offers" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Pricing</a>
             <a href="#hr" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Real HR</a>
-            <Link href="/start" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
-              Start Free Check
-            </Link>
+            {authed ? (
+              <>
+                <Link href="/dashboard" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
+                  Dashboard
+                </Link>
+                <button onClick={handleLogout} className="text-xs sm:text-sm font-medium text-siddhi-black/60 hover:text-siddhi-saffron transition whitespace-nowrap">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hidden sm:inline text-sm font-medium hover:text-siddhi-saffron transition">Login</Link>
+                <Link href="/start" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
+                  Start Free Check
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -188,8 +217,8 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 max-w-md sm:max-w-none mx-auto">
-            <Link href="/start" className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center">
-              Start Free Interview Check
+            <Link href={authed ? '/interview' : '/start'} className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center">
+              {authed ? 'Go to Interview Practice' : 'Start Free Interview Check'}
             </Link>
             <button onClick={() => openModal('Real HR Mock Interview')} className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-base sm:text-lg text-center">
               Request Real HR Interview
