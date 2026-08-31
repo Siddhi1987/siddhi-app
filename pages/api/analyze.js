@@ -3,6 +3,74 @@
 // The API key lives ONLY here (server-side) and never reaches the browser.
 // Returns strict JSON the interview page can render. On any failure it returns
 // an error and the frontend falls back to the rule-based feedback.
+//
+// FREE-MODEL FALLBACK CHAIN: it tries a list of free models in order. If one is
+// rate-limited, congested, or errors, it automatically tries the next — so a
+// single busy model never dead-ends the user. Only if ALL models fail does it
+// return an error (and the interview page then shows rule-based feedback).
+
+// Default chain = free models, best first. Override in Vercel with
+// OPENROUTER_MODELS (comma-separated) to change models without touching code.
+const DEFAULT_MODELS = [
+  'google/gemini-2.0-flash-exp:free',
+  'deepseek/deepseek-chat-v3-0324:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+];
+
+function getModels() {
+  const raw = process.env.OPENROUTER_MODELS || process.env.OPENROUTER_MODEL || '';
+  const list = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  return list.length ? list : DEFAULT_MODELS;
+}
+
+async function callModel({ model, key, system, user }) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  try {
+    const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://siddhiai.in',
+        'X-Title': 'SiddhiAI Interview Coach',
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.4,
+        max_tokens: 900,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+      }),
+    });
+    clearTimeout(timeout);
+
+    if (!upstream.ok) {
+      const t = await upstream.text().catch(() => '');
+      return { ok: false, detail: `HTTP ${upstream.status} ${t.slice(0, 160)}` };
+    }
+
+    const data = await upstream.json();
+    const content = data?.choices?.[0]?.message?.content || '';
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      // Some models wrap JSON in prose — extract the first {...} block.
+      const m = content.match(/\{[\s\S]*\}/);
+      if (!m) return { ok: false, detail: 'unparseable output' };
+      try { parsed = JSON.parse(m[0]); } catch { return { ok: false, detail: 'unparseable output' }; }
+    }
+    return { ok: true, parsed };
+  } catch (e) {
+    clearTimeout(timeout);
+    return { ok: false, detail: String(e).slice(0, 120) };
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,7 +88,6 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'AI is not configured yet.' });
   }
 
-  const model = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-exp:free';
   const isFresher = level === 'fresher';
 
   const system = [
@@ -49,69 +116,39 @@ export default async function handler(req, res) {
 
   const user = `Interview question: ${question}\nRole / level: ${role} (${isFresher ? 'fresher' : 'experienced'})\n\nCandidate's answer:\n"""${answer.slice(0, 4000)}"""`;
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+  const models = getModels();
+  const tried = [];
+  let parsed = null;
+  let usedModel = null;
 
-    const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://siddhiai.in',
-        'X-Title': 'SiddhiAI Interview Coach',
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        max_tokens: 900,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-      }),
-    });
-    clearTimeout(timeout);
-
-    if (!upstream.ok) {
-      const t = await upstream.text().catch(() => '');
-      return res.status(502).json({ error: 'AI upstream error', detail: t.slice(0, 200) });
-    }
-
-    const data = await upstream.json();
-    const content = data?.choices?.[0]?.message?.content || '';
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      // Some models wrap JSON in text — try to extract the first {...} block.
-      const m = content.match(/\{[\s\S]*\}/);
-      if (!m) return res.status(502).json({ error: 'AI returned unparseable output' });
-      try { parsed = JSON.parse(m[0]); } catch { return res.status(502).json({ error: 'AI returned unparseable output' }); }
-    }
-
-    // light validation
-    const clamp = (n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)));
-    const out = {
-      clarity: clamp(parsed.clarity),
-      confidence: clamp(parsed.confidence),
-      structure: clamp(parsed.structure),
-      presence: clamp(parsed.presence),
-      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3).map(String) : [],
-      improvements: Array.isArray(parsed.improvements)
-        ? parsed.improvements.slice(0, 3).map((i) => ({
-            title: String(i.title || 'Improve this'),
-            detail: String(i.detail || ''),
-            example: i.example ? String(i.example) : '',
-          }))
-        : [],
-      summary: String(parsed.summary || ''),
-      source: 'ai',
-    };
-    return res.status(200).json(out);
-  } catch (e) {
-    return res.status(502).json({ error: 'AI request failed', detail: String(e).slice(0, 120) });
+  for (const model of models) {
+    const r = await callModel({ model, key, system, user });
+    if (r.ok) { parsed = r.parsed; usedModel = model; break; }
+    tried.push(`${model}: ${r.detail}`);
   }
+
+  if (!parsed) {
+    return res.status(502).json({ error: 'All AI models unavailable', detail: tried.join(' | ').slice(0, 300) });
+  }
+
+  // light validation + clamp
+  const clamp = (n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)));
+  const out = {
+    clarity: clamp(parsed.clarity),
+    confidence: clamp(parsed.confidence),
+    structure: clamp(parsed.structure),
+    presence: clamp(parsed.presence),
+    strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3).map(String) : [],
+    improvements: Array.isArray(parsed.improvements)
+      ? parsed.improvements.slice(0, 3).map((i) => ({
+          title: String(i.title || 'Improve this'),
+          detail: String(i.detail || ''),
+          example: i.example ? String(i.example) : '',
+        }))
+      : [],
+    summary: String(parsed.summary || ''),
+    source: 'ai',
+    model: usedModel,
+  };
+  return res.status(200).json(out);
 }
