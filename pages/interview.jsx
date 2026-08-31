@@ -254,10 +254,14 @@ const buildCommunicationReport = (feedback, profileLabel) => {
   const clarityScore = clampScore(feedback.clarity);
   const structureScore = clampScore(feedback.structure);
   const confidenceScore = clampScore(
-    68 + Math.min(feedback.wordCount, 180) * 0.08 - feedback.fillerCount * 7 + (feedback.sentences >= 3 ? 6 : 0)
+    feedback.aiConfidence != null
+      ? feedback.aiConfidence
+      : 68 + Math.min(feedback.wordCount, 180) * 0.08 - feedback.fillerCount * 7 + (feedback.sentences >= 3 ? 6 : 0)
   );
   const professionalPresenceScore = clampScore(
-    62 + (feedback.hasNumbers ? 14 : 0) + (feedback.fillerCount <= 1 ? 10 : 0) + (feedback.wordCount >= 70 ? 8 : 0)
+    feedback.aiPresence != null
+      ? feedback.aiPresence
+      : 62 + (feedback.hasNumbers ? 14 : 0) + (feedback.fillerCount <= 1 ? 10 : 0) + (feedback.wordCount >= 70 ? 8 : 0)
   );
   const communicationScore = clampScore(
     clarityScore * 0.28 + confidenceScore * 0.24 + structureScore * 0.24 + professionalPresenceScore * 0.24
@@ -395,6 +399,7 @@ export default function Interview() {
   const [sessionComment, setSessionComment] = useState('');
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [hasPaid, setHasPaid] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   // On load: logged-in users skip the guest form and are checked for an active plan.
   useEffect(() => {
@@ -510,7 +515,7 @@ export default function Interview() {
     setAnswer('');
     setStep('practice');
   };
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (answer.trim().length < 20) {
       alert('Please give a more detailed answer (at least 20 characters).');
       return;
@@ -609,28 +614,82 @@ export default function Interview() {
       }
     }
     const topImprovements = improvements.slice(0, 3);
-    setFeedback({
+    const ruleStrengths = isFresher
+      ? [
+          wordCount > 50 ? `Good length — ${wordCount} words shows you can articulate` : 'Concise — you didn\'t ramble',
+          hasNumbers ? 'You included specifics — interviewers love that' : 'Clear enthusiasm comes through',
+          fillerWords < 2 ? 'Confident delivery — minimal fillers' : 'You engaged with the question seriously',
+        ]
+      : [
+          wordCount > 80 ? `Solid depth — ${wordCount} words shows mature thinking` : 'Concise delivery',
+          hasIChange ? 'Strong ownership language — used "I" verbs' : 'Clear narrative structure',
+          hasNumbers ? 'Quantified impact — that\'s senior-level' : 'Professional tone throughout',
+        ];
+    // The rule-based result. This is what free users see, and the automatic
+    // fallback for paid users if the AI coach errors or is rate-limited.
+    const ruleFeedback = {
       clarity: Math.min(95, 60 + wordCount * 0.4 - fillerWords * 3),
       structure: wordCount > 80 ? 88 : wordCount > 40 ? 72 : 55,
       wordCount,
       fillerCount: fillerWords,
       sentences,
       hasNumbers,
-      strengths: isFresher
-        ? [
-            wordCount > 50 ? `Good length — ${wordCount} words shows you can articulate` : 'Concise — you didn\'t ramble',
-            hasNumbers ? 'You included specifics — interviewers love that' : 'Clear enthusiasm comes through',
-            fillerWords < 2 ? 'Confident delivery — minimal fillers' : 'You engaged with the question seriously',
-          ]
-        : [
-            wordCount > 80 ? `Solid depth — ${wordCount} words shows mature thinking` : 'Concise delivery',
-            hasIChange ? 'Strong ownership language — used "I" verbs' : 'Clear narrative structure',
-            hasNumbers ? 'Quantified impact — that\'s senior-level' : 'Professional tone throughout',
-          ],
+      strengths: ruleStrengths,
       improvements: topImprovements,
-    });
-    setSessionsUsed((n) => n + 1);
-    setStep('feedback');
+      source: 'rule',
+    };
+
+    // Free users: rule-based only. Paid users: run the answer through the AI coach.
+    if (!hasPaid) {
+      setFeedback(ruleFeedback);
+      setSessionsUsed((n) => n + 1);
+      setStep('feedback');
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 22000);
+      const resp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          question: getQuestions()[qIndex] || '',
+          answer,
+          role: getEffectiveField() || 'General',
+          level: isFresher ? 'fresher' : 'experienced',
+          mode: 'feedback',
+        }),
+      });
+      clearTimeout(t);
+      if (!resp.ok) throw new Error('AI status ' + resp.status);
+      const ai = await resp.json();
+      if (!ai || ai.error) throw new Error(ai && ai.error ? ai.error : 'AI error');
+      const aiStrengths = Array.isArray(ai.strengths) && ai.strengths.length ? ai.strengths : ruleStrengths;
+      const aiImprovements = Array.isArray(ai.improvements) && ai.improvements.length ? ai.improvements : topImprovements;
+      // Merge: AI drives clarity/structure/strengths/improvements + confidence/presence
+      // for the report; the measured stats (words, fillers, sentences, numbers) stay real.
+      setFeedback({
+        ...ruleFeedback,
+        clarity: typeof ai.clarity === 'number' ? ai.clarity : ruleFeedback.clarity,
+        structure: typeof ai.structure === 'number' ? ai.structure : ruleFeedback.structure,
+        strengths: aiStrengths,
+        improvements: aiImprovements,
+        aiConfidence: typeof ai.confidence === 'number' ? ai.confidence : null,
+        aiPresence: typeof ai.presence === 'number' ? ai.presence : null,
+        aiSummary: ai.summary || '',
+        source: 'ai',
+      });
+    } catch (e) {
+      // Any failure → the user still gets the full rule-based feedback.
+      setFeedback(ruleFeedback);
+    } finally {
+      setAnalyzing(false);
+      setSessionsUsed((n) => n + 1);
+      setStep('feedback');
+    }
   };
   const nextQuestion = () => {
     const qs = getQuestions();
@@ -978,12 +1037,18 @@ export default function Interview() {
                 </span>
                 <button
                   onClick={submitAnswer}
-                  disabled={answer.trim().length < 20}
+                  disabled={answer.trim().length < 20 || analyzing}
                   className="px-5 sm:px-6 py-3 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Get Feedback →
+                  {analyzing ? 'Analyzing…' : 'Get Feedback →'}
                 </button>
               </div>
+              {analyzing && (
+                <div className="mt-4 flex items-center gap-3 rounded-lg border border-siddhi-saffron/30 bg-siddhi-saffron/5 px-4 py-3 text-sm text-siddhi-black/70">
+                  <span className="inline-block h-4 w-4 rounded-full border-2 border-siddhi-saffron border-t-transparent animate-spin" />
+                  Your AI coach is reading your answer and preparing personalised feedback…
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -991,9 +1056,14 @@ export default function Interview() {
           <div>
             <div className="text-center mb-8">
               <div className="inline-block px-4 py-1.5 bg-siddhi-saffron/10 border border-siddhi-saffron/30 rounded-full text-sm text-siddhi-saffron font-semibold mb-4">
-                ✓ Analysis Complete
+                {feedback.source === 'ai' ? '✦ AI Coach · Analysis Complete' : '✓ Analysis Complete'}
               </div>
               <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">Your feedback</h2>
+              {feedback.source === 'ai' && feedback.aiSummary && (
+                <p className="mt-4 max-w-xl mx-auto text-sm sm:text-base text-siddhi-black/70 italic">
+                  “{feedback.aiSummary}”
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
               <div className="bg-white p-4 sm:p-6 rounded-lg border border-siddhi-black/10">
