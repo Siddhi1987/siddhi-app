@@ -47,37 +47,164 @@ const EXPERIENCED_FIELDS = [
   'Customer Support / Success',
   'Other',
 ];
-const FRESHER_QUESTIONS = [
-  'Tell me about yourself.',
-  'Walk me through a project from your studies that you are most proud of.',
-  'What is your biggest strength, and how did you develop it?',
-];
+// Free users get `free` (3 questions). Pro users get free + pro (6 questions).
+const FRESHER_QUESTIONS = {
+  free: [
+    'Tell me about yourself.',
+    'Walk me through a project from your studies that you are most proud of.',
+    'What is your biggest strength, and how did you develop it?',
+  ],
+  pro: [
+    'Describe a time you had to learn something difficult quickly. How did you approach it?',
+    'Tell me about a disagreement in a team project. What did you do about it?',
+    'Where do you see yourself in three years, and what are you doing now to get there?',
+  ],
+};
 const EXPERIENCED_QUESTIONS = {
-  'Product Manager': [
-    'Walk me through the most impactful product you shipped. What was the measurable outcome?',
-    'Tell me about a time you killed a feature. What was the data, and how did you align stakeholders?',
-    'How do you prioritize when Engineering bandwidth is half of what you need for the quarter?',
-  ],
-  'Software Engineer / Developer': [
-    'Describe the most technically challenging system you have designed or contributed to.',
-    'Tell me about a production incident you led. What was the root cause and the fix?',
-    'How do you balance speed vs. code quality when shipping under deadline?',
-  ],
-  'HR / People Operations': [
-    'Walk me through your HR journey and the most complex people problem you solved.',
-    'Tell me about a high-performer who was also a culture risk. How did you handle it?',
-    'How do you measure HR impact in numbers leadership will actually respect?',
-  ],
-  'Sales / Business Development': [
-    'Describe your biggest deal. Walk me through the close — start to signed contract.',
-    'Tell me about a prospect you lost. What would you do differently today?',
-    'How do you build a pipeline in a market where your product is new and unknown?',
-  ],
-  default: [
-    'Tell me about yourself and walk me through your career so far.',
-    'Describe the most impactful project you have worked on. What was your specific contribution?',
-    'Tell me about a time you failed. What did you learn, and what would you do differently?',
-  ],
+  'Product Manager': {
+    free: [
+      'Walk me through the most impactful product you shipped. What was the measurable outcome?',
+      'Tell me about a time you killed a feature. What was the data, and how did you align stakeholders?',
+      'How do you prioritize when Engineering bandwidth is half of what you need for the quarter?',
+    ],
+    pro: [
+      'Tell me about a product decision you got wrong. How did you find out, and what changed?',
+      'How do you decide what NOT to build? Give a concrete example.',
+      'Describe how you turn a vague executive ask into a shipped, measurable outcome.',
+    ],
+  },
+  'Software Engineer / Developer': {
+    free: [
+      'Describe the most technically challenging system you have designed or contributed to.',
+      'Tell me about a production incident you led. What was the root cause and the fix?',
+      'How do you balance speed vs. code quality when shipping under deadline?',
+    ],
+    pro: [
+      'Tell me about a time you disagreed with a senior engineer on an approach. How did it resolve?',
+      'Walk me through how you would improve the performance of a slow endpoint.',
+      'Describe a piece of tech debt you championed paying down. How did you justify it?',
+    ],
+  },
+  'HR / People Operations': {
+    free: [
+      'Walk me through your HR journey and the most complex people problem you solved.',
+      'Tell me about a high-performer who was also a culture risk. How did you handle it?',
+      'How do you measure HR impact in numbers leadership will actually respect?',
+    ],
+    pro: [
+      'Describe a difficult termination you managed. How did you protect both the person and the company?',
+      'How have you improved retention in a specific team? What did you actually change?',
+      'Tell me about a policy you introduced that changed behaviour across the org.',
+    ],
+  },
+  'Sales / Business Development': {
+    free: [
+      'Describe your biggest deal. Walk me through the close — start to signed contract.',
+      'Tell me about a prospect you lost. What would you do differently today?',
+      'How do you build a pipeline in a market where your product is new and unknown?',
+    ],
+    pro: [
+      'Tell me about a time you turned a "no" into a "yes." What shifted?',
+      'How do you handle a prospect who says your price is too high?',
+      'Walk me through how you research and qualify a new account before the first call.',
+    ],
+  },
+  'Marketing / Growth': {
+    free: [
+      'Walk me through a campaign you owned end to end. What was the measurable result?',
+      'Tell me about a channel that stopped working. How did you diagnose and respond?',
+      'How do you decide where to spend a limited marketing budget?',
+    ],
+    pro: [
+      'Describe an experiment that failed. What did you learn and do next?',
+      'How do you connect a marketing metric to actual revenue?',
+      'Tell me about a time you grew something with almost no budget.',
+    ],
+  },
+  'Data Scientist / Analyst': {
+    free: [
+      'Walk me through an analysis that changed a real business decision.',
+      'Tell me about a time your data contradicted what leadership believed. What happened?',
+      'How do you make a complex finding land with a non-technical audience?',
+    ],
+    pro: [
+      'Describe a model or analysis that did not work in production. Why?',
+      'How do you decide whether a result is signal or noise?',
+      'Tell me about a metric you helped define. Why did it matter?',
+    ],
+  },
+  'Designer (UX/UI/Visual)': {
+    free: [
+      'Walk me through a design you are proud of, from problem to shipped solution.',
+      'Tell me about a time user research changed your design direction.',
+      'How do you handle feedback that you disagree with from a stakeholder?',
+    ],
+    pro: [
+      'Describe a design that tested well but failed with real users. What did you learn?',
+      'How do you balance business goals with what is best for the user?',
+      'Tell me about a time you had to design under heavy constraints.',
+    ],
+  },
+  'Operations / Project Management': {
+    free: [
+      'Walk me through a project you delivered against a tight deadline.',
+      'Tell me about a time a project went off the rails. How did you recover it?',
+      'How do you keep multiple stakeholders aligned when priorities conflict?',
+    ],
+    pro: [
+      'Describe a process you built or fixed that saved real time or money.',
+      'How do you decide what to escalate versus solve yourself?',
+      'Tell me about a risk you spotted early. What did you do?',
+    ],
+  },
+  'Finance / Accounting': {
+    free: [
+      'Walk me through a financial analysis that influenced a real decision.',
+      'Tell me about a time you found an error or discrepancy. What did you do?',
+      'How do you explain a financial concept to a non-finance stakeholder?',
+    ],
+    pro: [
+      'Describe a time you had to deliver bad financial news. How did you handle it?',
+      'How do you approach building a forecast under high uncertainty?',
+      'Tell me about a control or process you strengthened.',
+    ],
+  },
+  'Consulting (Strategy)': {
+    free: [
+      'Walk me through a recommendation you made that a client actually implemented.',
+      'Tell me about a time your analysis changed a client’s direction.',
+      'How do you structure your thinking on an ambiguous problem?',
+    ],
+    pro: [
+      'Describe a time a client pushed back hard. How did you handle it?',
+      'How do you make a recommendation when the data is incomplete?',
+      'Tell me about the most complex stakeholder situation you navigated.',
+    ],
+  },
+  'Customer Support / Success': {
+    free: [
+      'Walk me through how you turned an unhappy customer into a happy one.',
+      'Tell me about a time you handled an angry customer under pressure.',
+      'How do you know when to escalate versus solve it yourself?',
+    ],
+    pro: [
+      'Describe a time you spotted a churn risk early. What did you do?',
+      'How do you turn support feedback into a product or process change?',
+      'Tell me about the hardest account you saved.',
+    ],
+  },
+  default: {
+    free: [
+      'Tell me about yourself and walk me through your career so far.',
+      'Describe the most impactful project you have worked on. What was your specific contribution?',
+      'Tell me about a time you failed. What did you learn, and what would you do differently?',
+    ],
+    pro: [
+      'Tell me about a time you led without authority.',
+      'Describe a decision you made with incomplete information.',
+      'Where do you want to grow next, and what are you doing about it?',
+    ],
+  },
 };
 const FREE_LIMIT = 3;
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
@@ -89,6 +216,40 @@ const PREMIUM_REPORT_SECTIONS = [
   'Personalized Recommendations',
 ];
 const clampScore = (score) => Math.max(35, Math.min(96, Math.round(score)));
+const band = (v) => (v >= 80 ? 'high' : v >= 65 ? 'solid' : 'developing');
+// Generates the REAL Pro report content from the candidate's scores.
+const buildPremiumSections = (r, feedback, isFresher) => {
+  const impression = {
+    high: 'A hiring manager would likely finish this conversation impressed. You come across as clear, credible, and in control of your material — the kind of answer that moves you to the next round.',
+    solid: 'You would come across as competent and hireable. There is a real signal of ability here; tightening one or two areas below would move you from "safe" to "memorable".',
+    developing: 'Right now a hiring manager may be left unsure. The substance is there, but the delivery is not yet doing it justice — the recommendations below are where the fastest gains are.',
+  }[band(r.communicationScore)];
+  const lead = {
+    high: 'You show strong leadership signal — ownership language, structured thinking, and calm delivery. This reads as someone who can be trusted with scope.',
+    solid: 'There is leadership potential here. Adding more "I owned / I decided / I drove" framing and one clear result would sharpen how senior you sound.',
+    developing: 'Leadership signal is still emerging. Lead with a decision you made and the outcome you owned, rather than describing the situation around you.',
+  }[band(Math.round((r.confidenceScore + r.structureScore) / 2))];
+  const readiness = {
+    high: 'You are interview-ready for roles at this level. Keep practising to stay sharp and to build a second and third example for follow-up questions.',
+    solid: 'You are close. A few focused practice sessions on structure and specifics would get you consistently interview-ready.',
+    developing: 'You are in build mode. Run several more practice sessions, focusing on one weakness at a time — you will see the score climb quickly.',
+  }[band(r.communicationScore)];
+  const weakest = [
+    ['clarity', r.clarityScore],
+    ['confidence', r.confidenceScore],
+    ['structure', r.structureScore],
+    ['professional presence', r.professionalPresenceScore],
+  ].sort((a, b) => a[1] - b[1])[0][0];
+  const roadmap = `Over the next 2 weeks: (1) Do 3 practice sessions focused on ${weakest} — your lowest score today. (2) Prepare one "signature story" with a clear result and numbers, and rehearse it until it flows. (3) Record yourself once and re-watch — you will catch fillers and pacing you cannot feel in the moment.`;
+  const recs = (feedback.improvements || []).slice(0, 3).map((i) => i.detail).filter(Boolean);
+  return [
+    { title: 'Hiring Manager Impression', body: impression },
+    { title: 'Leadership Potential', body: lead },
+    { title: 'Interview Readiness', body: readiness },
+    { title: 'Career Growth Roadmap', body: roadmap },
+    { title: 'Personalized Recommendations', body: recs.length ? recs.join(' ') : 'Keep adding one concrete example with a measurable result to every answer — it is the fastest way to sound more senior.' },
+  ];
+};
 const buildCommunicationReport = (feedback, profileLabel) => {
   const clarityScore = clampScore(feedback.clarity);
   const structureScore = clampScore(feedback.structure);
@@ -106,7 +267,7 @@ const buildCommunicationReport = (feedback, profileLabel) => {
   const biggestImprovementArea = firstImprovement
     ? `${firstImprovement.title.replace(/[^\w\s:.-]/g, '').trim()}: ${firstImprovement.detail}`
     : 'Add one specific example with measurable outcome to make your answer more convincing.';
-  return {
+  const base = {
     profileLabel,
     communicationScore,
     clarityScore,
@@ -122,6 +283,8 @@ const buildCommunicationReport = (feedback, profileLabel) => {
       { label: 'Professional Presence', value: professionalPresenceScore, hint: 'How credible you sound to a hiring manager.' },
     ],
   };
+  base.premium = buildPremiumSections(base, feedback, profileLabel);
+  return base;
 };
 // =================== SEARCHABLE DROPDOWN COMPONENT ===================
 function SearchableDropdown({ label, options, value, onChange, otherValue, onOtherChange, required, placeholder }) {
@@ -211,7 +374,6 @@ function SearchableDropdown({ label, options, value, onChange, otherValue, onOth
 export default function Interview() {
   const [step, setStep] = useState('register');
   const [tier, setTier] = useState(null);
-  // User registration (mandatory)
   const [userName, setUserName] = useState('');
   const [userMobile, setUserMobile] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -228,16 +390,13 @@ export default function Interview() {
   const [feedback, setFeedback] = useState(null);
   const [communicationReport, setCommunicationReport] = useState(null);
   const [reportSaveStatus, setReportSaveStatus] = useState('');
-  // Post-session rating
   const [sessionRating, setSessionRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [sessionComment, setSessionComment] = useState('');
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
-  // Paid / logged-in awareness
   const [hasPaid, setHasPaid] = useState(false);
 
-  // On load: if the visitor is logged in, prefill their details, skip the
-  // guest "register" step, and check whether they have an active paid plan.
+  // On load: logged-in users skip the guest form and are checked for an active plan.
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
     let active = true;
@@ -268,9 +427,12 @@ export default function Interview() {
     return gradField === 'Other' ? gradOther : gradField;
   };
   const getQuestions = () => {
-    if (isFresher) return FRESHER_QUESTIONS;
+    if (isFresher) {
+      return hasPaid ? FRESHER_QUESTIONS.free.concat(FRESHER_QUESTIONS.pro) : FRESHER_QUESTIONS.free;
+    }
     const field = expField === 'Other' ? null : expField;
-    return EXPERIENCED_QUESTIONS[field] || EXPERIENCED_QUESTIONS.default;
+    const bank = EXPERIENCED_QUESTIONS[field] || EXPERIENCED_QUESTIONS.default;
+    return hasPaid ? bank.free.concat(bank.pro) : bank.free;
   };
   const saveCommunicationReport = async (report) => {
     setReportSaveStatus('');
@@ -296,11 +458,11 @@ export default function Interview() {
         professional_presence_score: report.professionalPresenceScore,
         strength: report.topStrength,
         improvement_area: report.biggestImprovementArea,
-        is_preview: true,
+        is_preview: !hasPaid,
       });
-      setReportSaveStatus(error ? 'Preview shown. Saving will retry after login.' : 'Preview saved to your SiddhiAI account.');
+      setReportSaveStatus(error ? 'Report shown. Saving will retry after login.' : (hasPaid ? 'Report saved to your SiddhiAI account.' : 'Preview saved to your SiddhiAI account.'));
     } catch (error) {
-      setReportSaveStatus('Preview shown. Saving will retry after login.');
+      setReportSaveStatus('Report shown. Saving will retry after login.');
     }
   };
   const pickTier = (selectedTier) => {
@@ -336,6 +498,7 @@ export default function Interview() {
         mobile: userMobile,
         email: userEmail,
         tier,
+        plan: hasPaid ? 'Pro' : 'Free',
         graduation: isFresher ? (gradField === 'Other' ? gradOther : gradField) : null,
         post_graduation: isFresher ? (pgField === 'Other' ? pgOther : pgField) : null,
         experienced_field: !isFresher ? (expField === 'Other' ? expOther : expField) : null,
@@ -358,10 +521,8 @@ export default function Interview() {
     const hasNumbers = /\d+/.test(answer);
     const hasIChange = /\bI\s+(led|built|shipped|launched|owned|drove|managed)\b/i.test(answer);
     const startsWithSituation = /^(in my|at my|during|when i|while)/i.test(answer.trim());
-    // Detailed improvement engine — gives specific, actionable feedback
     const improvements = [];
     if (isFresher) {
-      // FRESHER detailed feedback
       if (wordCount < 50) {
         improvements.push({
           title: '🎯 Your answer was too short',
@@ -395,7 +556,6 @@ export default function Interview() {
           example: 'Weak: "I improved the website." Strong: "I improved the website load time by 40% over 2 weeks."',
         });
       }
-      // Always include at least one positive next step
       if (improvements.length === 0) {
         improvements.push({
           title: '🚀 Take it to the next level',
@@ -403,7 +563,6 @@ export default function Interview() {
         });
       }
     } else {
-      // EXPERIENCED detailed feedback
       if (wordCount < 80) {
         improvements.push({
           title: '🎯 Your answer felt thin for your level',
@@ -426,7 +585,7 @@ export default function Interview() {
       if (!hasNumbers) {
         improvements.push({
           title: '🔢 No measurable impact mentioned',
-          detail: 'Senior roles are evaluated on impact. Your answer had zero numbers. Add: revenue ($), users, time saved, % improvement, team size, deadline beaten.',
+          detail: 'Senior roles are evaluated on impact. Your answer had zero numbers. Add: revenue, users, time saved, % improvement, team size, deadline beaten.',
           example: '"My change reduced API latency from 800ms to 120ms — saving the team 15 hours/week of customer escalations."',
         });
       }
@@ -449,7 +608,6 @@ export default function Interview() {
         });
       }
     }
-    // Limit to top 3 most relevant improvements
     const topImprovements = improvements.slice(0, 3);
     setFeedback({
       clarity: Math.min(95, 60 + wordCount * 0.4 - fillerWords * 3),
@@ -495,7 +653,6 @@ export default function Interview() {
       alert('Please rate your session before continuing.');
       return;
     }
-    // Send rating + optional comment to Formspree
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -513,7 +670,6 @@ export default function Interview() {
       }),
     }).catch(() => {});
     setRatingSubmitted(true);
-    // After short delay, reset to tier selection
     setTimeout(() => {
       setStep('select_tier');
       setTier(null);
@@ -557,7 +713,6 @@ export default function Interview() {
         </div>
       </nav>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* ============ STEP 0: REGISTRATION (MANDATORY) ============ */}
         {step === 'register' && (
           <div>
             <div className="text-center mb-8">
@@ -625,7 +780,6 @@ export default function Interview() {
                 if (!nameOk) { alert('Please enter your name (at least 2 characters).'); return; }
                 if (!mobileOk) { alert('Please enter a valid mobile number (at least 10 digits).'); return; }
                 if (!emailOk) { alert('Please enter a valid email address.'); return; }
-                // Send registration to Formspree silently
                 fetch(FORMSPREE_ENDPOINT, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -654,13 +808,15 @@ export default function Interview() {
           <div>
             <div className="text-center mb-8 sm:mb-10">
               <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-                Interview Coach · Step 1 of 2
+                {hasPaid ? 'Pro · Interview Coach' : 'Interview Coach · Step 1 of 2'}
               </p>
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
                 Who are you today?
               </h1>
               <p className="text-siddhi-black/60 text-sm sm:text-base max-w-md mx-auto">
-                We'll tailor your interview questions based on where you are in your journey.
+                {hasPaid
+                  ? 'Your Pro access is active — 6-question sessions, full role banks, and your complete report.'
+                  : "We'll tailor your interview questions based on where you are in your journey."}
               </p>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -777,7 +933,7 @@ export default function Interview() {
               Start practice →
             </button>
             <p className="text-xs text-siddhi-black/50 text-center mt-3">
-              3 questions · ~10 minutes · Free to try
+              {hasPaid ? '6 questions · full report · Pro access' : '3 questions · ~10 minutes · Free to try'}
             </p>
           </div>
         )}
@@ -882,7 +1038,6 @@ export default function Interview() {
                   </div>
                 ))}
               </div>
-              {/* Stats footer */}
               <div className="mt-5 pt-4 border-t border-siddhi-black/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div className="text-center">
                   <div className="text-siddhi-black/50">Words</div>
@@ -902,12 +1057,14 @@ export default function Interview() {
                 </div>
               </div>
             </div>
-            <div className="bg-siddhi-gold/10 border border-siddhi-gold/30 rounded-lg p-4 mb-6 text-sm">
-              <strong>Pro unlocks:</strong> Personalized coaching, deep voice analysis, 50+ role-specific question banks, and early access to Negotiate / Speak / Lead.{' '}
-              <Link href="/payment" className="text-siddhi-saffron font-semibold underline">
-                Try Pro
-              </Link>
-            </div>
+            {!hasPaid && (
+              <div className="bg-siddhi-gold/10 border border-siddhi-gold/30 rounded-lg p-4 mb-6 text-sm">
+                <strong>Pro unlocks:</strong> unlimited practice, 6-question sessions, tailored question banks for every role, and your complete Communication Intelligence Report.{' '}
+                <Link href="/payment" className="text-siddhi-saffron font-semibold underline">
+                  Try Pro
+                </Link>
+              </div>
+            )}
             <button
               onClick={nextQuestion}
               className="w-full px-6 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition text-base sm:text-lg"
@@ -922,7 +1079,7 @@ export default function Interview() {
               <div className="absolute inset-0 bg-gradient-to-br from-siddhi-saffron/30 via-transparent to-siddhi-gold/25" />
               <div className="relative">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 border border-white/20 rounded-full text-xs sm:text-sm font-semibold mb-5">
-                  Communication Intelligence Preview
+                  {hasPaid ? 'Communication Intelligence Report' : 'Communication Intelligence Preview'}
                 </div>
                 <div className="grid md:grid-cols-[1fr_auto] gap-6 items-center">
                   <div>
@@ -990,57 +1147,66 @@ export default function Interview() {
                 </p>
               </div>
             </div>
-            <div className="bg-white border border-siddhi-black/10 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold">
-                    {hasPaid ? 'Full report' : 'Premium report locked'}
-                  </p>
-                  <h3 className="font-display text-2xl font-bold mt-1">
-                    {hasPaid ? 'Your Communication Intelligence Report' : 'Unlock the full Communication Intelligence Report'}
-                  </h3>
-                </div>
-                <div className="rounded-full border border-siddhi-saffron/30 px-4 py-2 text-sm font-bold text-siddhi-saffron bg-siddhi-saffron/10">
-                  {hasPaid ? 'Pro · Active' : '30-Day Access'}
-                </div>
-              </div>
-              {!hasPaid && (
-                <>
-                  <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                    {PREMIUM_REPORT_SECTIONS.map((section) => (
-                      <div
-                        key={section}
-                        className="relative overflow-hidden rounded-lg border border-siddhi-black/10 bg-siddhi-black/[0.03] p-4"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="font-semibold text-siddhi-black/75">{section}</span>
-                          <span className="text-xs uppercase tracking-wider text-siddhi-black/40 font-bold">Locked</span>
-                        </div>
-                        <div className="mt-3 h-2 w-4/5 rounded bg-siddhi-black/10" />
-                        <div className="mt-2 h-2 w-2/3 rounded bg-siddhi-black/10" />
-                      </div>
-                    ))}
+
+            {hasPaid ? (
+              <div className="bg-white border border-siddhi-black/10 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold">Your full report</p>
+                    <h3 className="font-display text-2xl font-bold mt-1">Communication Intelligence Report</h3>
                   </div>
-                  <Link
-                    href="/payment"
-                    className="block w-full text-center px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-base sm:text-lg"
-                  >
-                    Unlock Full Communication Intelligence Report
-                    <span className="block text-sm font-semibold text-white/85 mt-1">₹499 for 30-Day Access</span>
-                  </Link>
-                </>
-              )}
-              {hasPaid && (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {PREMIUM_REPORT_SECTIONS.map((section) => (
-                    <div key={section} className="rounded-lg border border-siddhi-gold/30 bg-siddhi-gold/5 p-4">
-                      <span className="font-semibold text-siddhi-black/80">{section}</span>
-                      <p className="text-xs text-siddhi-black/55 mt-1">Included with your Pro access.</p>
+                  <div className="rounded-full border border-siddhi-saffron/30 px-4 py-2 text-sm font-bold text-siddhi-saffron bg-siddhi-saffron/10 whitespace-nowrap">
+                    Pro · Active
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {communicationReport.premium.map((sec) => (
+                    <div key={sec.title} className="border-l-4 border-siddhi-gold pl-4 py-1">
+                      <div className="font-semibold text-sm sm:text-base mb-1 text-siddhi-black/85">{sec.title}</div>
+                      <p className="text-sm text-siddhi-black/75 leading-relaxed">{sec.body}</p>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="bg-white border border-siddhi-black/10 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-siddhi-saffron font-bold">
+                      Full report locked
+                    </p>
+                    <h3 className="font-display text-2xl font-bold mt-1">
+                      Unlock the full Communication Intelligence Report
+                    </h3>
+                  </div>
+                  <div className="rounded-full border border-siddhi-saffron/30 px-4 py-2 text-sm font-bold text-siddhi-saffron bg-siddhi-saffron/10">
+                    30-Day Access
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3 mb-6">
+                  {PREMIUM_REPORT_SECTIONS.map((section) => (
+                    <div
+                      key={section}
+                      className="relative overflow-hidden rounded-lg border border-siddhi-black/10 bg-siddhi-black/[0.03] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-semibold text-siddhi-black/75">{section}</span>
+                        <span className="text-xs uppercase tracking-wider text-siddhi-black/40 font-bold">Locked</span>
+                      </div>
+                      <div className="mt-3 h-2 w-4/5 rounded bg-siddhi-black/10" />
+                      <div className="mt-2 h-2 w-2/3 rounded bg-siddhi-black/10" />
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/payment"
+                  className="block w-full text-center px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition shadow-lg text-base sm:text-lg"
+                >
+                  Unlock Full Communication Intelligence Report
+                  <span className="block text-sm font-semibold text-white/85 mt-1">₹499 for 30-Day Access</span>
+                </Link>
+              </div>
+            )}
             <button
               onClick={() => setStep('session_rating')}
               className="w-full px-6 py-4 border-2 border-siddhi-black/15 text-siddhi-black font-semibold rounded-md hover:border-siddhi-saffron hover:text-siddhi-saffron transition"
@@ -1049,7 +1215,6 @@ export default function Interview() {
             </button>
           </div>
         )}
-        {/* ============ STEP: SESSION RATING (MANDATORY) ============ */}
         {step === 'session_rating' && (
           <div>
             {!ratingSubmitted ? (
@@ -1067,7 +1232,6 @@ export default function Interview() {
                   </p>
                 </div>
                 <div className="bg-white border border-siddhi-black/10 rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
-                  {/* Star rating */}
                   <div>
                     <label className="block text-sm font-semibold mb-3 text-center">
                       Your rating <span className="text-red-500">*</span>
@@ -1103,7 +1267,6 @@ export default function Interview() {
                       </p>
                     )}
                   </div>
-                  {/* Optional comment */}
                   <div>
                     <label className="block text-sm font-semibold mb-2">
                       Tell us more (optional)
@@ -1151,7 +1314,7 @@ export default function Interview() {
               You've used all 3 free sessions
             </h2>
             <p className="text-siddhi-black/60 mb-8 max-w-md mx-auto">
-              Unlock unlimited practice, personalized Pro coaching, and all role banks.
+              Unlock unlimited practice, 6-question sessions, tailored role banks, and your full report.
             </p>
             <Link
               href="/payment"
