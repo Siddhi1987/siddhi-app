@@ -33,7 +33,7 @@ export default function StartAssessment() {
 
   const selected = paths.find((path) => path.id === selectedPath);
 
-  const continueToLogin = () => {
+  const continueToInterview = () => {
     if (!targetRole.trim() || !challenge.trim()) {
       alert('Please add your target role and biggest interview challenge.');
       return;
@@ -53,7 +53,9 @@ export default function StartAssessment() {
       );
     }
 
-    router.push('/login');
+    // Go straight into the free AI mock (guest flow captures name + email,
+    // no account/password wall). Login is only for returning paid users.
+    router.push('/interview');
   };
 
   return (
@@ -65,7 +67,7 @@ export default function StartAssessment() {
             <span className="font-sanskrit text-siddhi-gold">सिद्धि</span>
           </Link>
           <Link href="/login" className="text-sm text-siddhi-black/60 hover:text-siddhi-saffron">
-            Already started? Login
+            Already a member? Login
           </Link>
         </div>
       </nav>
@@ -80,8 +82,8 @@ export default function StartAssessment() {
               Do not let your first interview be your first practice.
             </h1>
             <p className="text-lg text-siddhi-black/65 mb-8">
-              Tell SiddhiAI what you are preparing for. We will guide you into a short AI assessment,
-              show your readiness preview, and help you improve before the real interview.
+              Tell SiddhiAI what you are preparing for. We will take you straight into a short AI mock
+              interview, show your readiness score, and help you improve before the real interview.
             </p>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -114,10 +116,10 @@ export default function StartAssessment() {
                 What happens next
               </p>
               <div className="grid sm:grid-cols-4 gap-4 text-sm">
-                <div>1. Login with email</div>
-                <div>2. Start AI assessment</div>
-                <div>3. See readiness preview</div>
-                <div>4. Unlock 30-day access</div>
+                <div>1. Start your AI mock</div>
+                <div>2. Answer 3 questions</div>
+                <div>3. Get your readiness score</div>
+                <div>4. Unlock full 30-day access</div>
               </div>
             </div>
           </div>
@@ -184,14 +186,14 @@ export default function StartAssessment() {
 
             <button
               type="button"
-              onClick={continueToLogin}
+              onClick={continueToInterview}
               className="mt-7 w-full px-6 py-4 bg-siddhi-saffron text-white font-bold rounded-xl hover:bg-siddhi-gold transition shadow-lg text-lg"
             >
-              Continue to Free Assessment
+              Start My Free Mock Interview
             </button>
 
             <p className="text-xs text-siddhi-black/50 text-center mt-4">
-              You will continue with secure email login. No password required.
+              No account needed to start — jump straight into your free AI mock.
             </p>
           </div>
         </section>
