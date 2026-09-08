@@ -6,9 +6,10 @@ import FeedbackButton from '../components/FeedbackButton';
 
 const GA_MEASUREMENT_ID = 'G-FHBXT2SDGL';
 const CLARITY_PROJECT_ID = 'wsfvfc784e';
+const FB_PIXEL_ID = '1224993983157531'; // SiddhiAI Website pixel
 
 const PAGE_TITLES = {
-  '/': 'SIDDHI — India\'s First Communication AI Inspired by Vak Siddhi',
+  '/': 'SIDDHI — AI Mock Interview Practice & Honest Feedback',
   '/interview': 'AI Mock Interview Practice — SIDDHI',
   '/payment': 'Upgrade to Pro — SIDDHI',
   '/feedback': 'Share Your Feedback — SIDDHI',
@@ -19,6 +20,21 @@ const PAGE_TITLES = {
 const PAGE_DESCRIPTIONS = {
   '/': 'SIDDHI AI helps students and professionals practice AI mock interviews, improve interview communication, and access real HR interview feedback.',
   '/interview': 'Practice AI mock interviews with SIDDHI and improve clarity, confidence, structure, and interview communication skills.',
+};
+
+const ORG_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'SIDDHI AI',
+  url: 'https://siddhiai.in',
+  logo: 'https://siddhiai.in/siddhi-logo.png',
+  description:
+    'SIDDHI AI is a communication intelligence platform for AI mock interview practice, confidence building, and real HR-style feedback.',
+  sameAs: [
+    'https://www.linkedin.com/company/123143945/',
+    'https://www.facebook.com/profile.php?id=61589899502708',
+    'https://www.instagram.com/siddhiai_official/',
+  ],
 };
 
 export default function App({ Component, pageProps }) {
@@ -43,6 +59,10 @@ export default function App({ Component, pageProps }) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
+        />
       </Head>
 
       <Script
@@ -69,6 +89,23 @@ export default function App({ Component, pageProps }) {
           })(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");
         `}
       </Script>
+
+      {FB_PIXEL_ID && FB_PIXEL_ID !== 'PASTE_YOUR_PIXEL_ID_HERE' && (
+        <Script id="facebook-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${FB_PIXEL_ID}');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+      )}
 
       <main>
         <Component {...pageProps} />
