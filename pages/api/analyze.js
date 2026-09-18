@@ -12,9 +12,10 @@
 // Default chain = free models, best first. Override in Vercel with
 // OPENROUTER_MODELS (comma-separated) to change models without touching code.
 const DEFAULT_MODELS = [
-  'google/gemini-2.0-flash-exp:free',
-  'deepseek/deepseek-chat-v3-0324:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
+  'google/gemma-4-31b-it:free',
+  'deepseek/deepseek-v4-flash-0731:free',
+  'z-ai/glm-5.2:free',
+  'qwen/qwen3.8-27b:free',
 ];
 
 function getModels() {
