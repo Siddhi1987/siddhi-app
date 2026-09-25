@@ -12,12 +12,13 @@
 // Default chain = free models, best first. Override in Vercel with
 // OPENROUTER_MODELS (comma-separated) to change models without touching code.
 const DEFAULT_MODELS = [
+  // Paid (reliable) first — dormant until OpenRouter credit is added, then used automatically.
+  'google/gemini-2.5-flash-lite',
+  'openai/gpt-4o-mini',
+  // Free fallbacks (used if no credit / paid unavailable):
   'google/gemma-4-31b-it:free',
   'qwen/qwen3.8-27b:free',
   'z-ai/glm-5.2:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
-  'google/gemma-4-26b-a4b-it:free',
-  'openrouter/free',
 ];
 
 function getModels() {
