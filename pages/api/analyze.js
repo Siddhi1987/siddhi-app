@@ -13,9 +13,11 @@
 // OPENROUTER_MODELS (comma-separated) to change models without touching code.
 const DEFAULT_MODELS = [
   'google/gemma-4-31b-it:free',
-  'deepseek/deepseek-v4-flash-0731:free',
-  'z-ai/glm-5.2:free',
   'qwen/qwen3.8-27b:free',
+  'z-ai/glm-5.2:free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'openrouter/free',
 ];
 
 function getModels() {
