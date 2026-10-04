@@ -147,17 +147,21 @@ export default function Home() {
       items: ['AI interview simulation', 'Detailed improvement report', 'Answer quality analysis', 'Personal practice roadmap'],
       cta: 'Join Priority List',
       module: 'Deep Interview Analysis',
-      primary: true,
+      primary: false,
     },
     {
-      name: 'Real HR Mock Interview',
-      price: '₹3,999',
-      tag: 'Premium',
-      desc: 'For candidates preparing for high-stakes interviews with real HR-style evaluation.',
-      items: ['Live HR-style mock interview', 'Pressure simulation', 'Resume and communication feedback', 'Action plan after session'],
-      cta: 'Request HR Slot',
-      module: 'Real HR Mock Interview',
-      primary: false,
+      name: 'Real HR Interview Intensive',
+      price: '₹3,499',
+      value: '₹5,997',
+      save: 'You save ₹2,498 · 42% off',
+      tag: 'Complete 1:1 bundle',
+      desc: 'Walk into your real interview fully prepared: AI practice, a deep report, and a live 1:1 with a real HR.',
+      items: ['AI mock interview + instant scoring (worth ₹499)', 'Deep AI performance report + action plan (worth ₹1,499)', 'Live 60-min 1:1 HR interview on Google Meet (worth ₹3,999)', 'Personal improvement roadmap after your session'],
+      cta: 'Pay ₹3,499 → Book your slot',
+      href: 'https://rzp.io/rzp/puqldo8',
+      external: true,
+      note: 'After payment, we email you within 24 hours to book your weekend slot (Sat / Sun) and send your Google Meet invite.',
+      primary: true,
     },
   ];
 
@@ -414,23 +418,45 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {offers.map((offer) => (
-              <div key={offer.name} className={`p-7 rounded-lg border-2 relative ${offer.primary ? 'border-siddhi-saffron bg-gradient-to-br from-siddhi-ivory to-white shadow-xl' : 'border-siddhi-black/10 bg-siddhi-ivory/40'}`}>
+              <div key={offer.name} className={`p-7 rounded-lg border-2 relative flex flex-col ${offer.primary ? 'border-siddhi-saffron bg-gradient-to-br from-siddhi-ivory to-white shadow-xl' : 'border-siddhi-black/10 bg-siddhi-ivory/40'}`}>
+                {offer.primary && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-siddhi-saffron text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">MOST POPULAR</div>
+                )}
                 <div className="text-xs uppercase tracking-wider font-bold text-siddhi-saffron mb-3">{offer.tag}</div>
                 <h3 className="font-display text-2xl font-bold mb-2">{offer.name}</h3>
                 <p className="text-sm text-siddhi-black/60 mb-5 min-h-[48px]">{offer.desc}</p>
-                <div className="text-4xl font-bold mb-6 text-siddhi-saffron">{offer.price}</div>
+                <div className="mb-6">
+                  {offer.value && (
+                    <div className="text-sm text-siddhi-black/45 mb-1">
+                      <span className="line-through">{offer.value}</span> <span className="text-siddhi-black/60">if bought separately</span>
+                    </div>
+                  )}
+                  <div className="text-4xl font-bold text-siddhi-saffron">{offer.price}</div>
+                  {offer.save && (
+                    <div className="inline-block mt-2 text-xs font-bold text-green-800 bg-green-100 px-2 py-0.5 rounded-full">{offer.save}</div>
+                  )}
+                </div>
                 <ul className="space-y-3 mb-8 text-sm text-siddhi-black/75">
                   {offer.items.map((item) => <li key={item}>✓ {item}</li>)}
                 </ul>
-                {offer.href ? (
-                  <Link href={offer.href} className={`block text-center px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
-                    {offer.cta}
-                  </Link>
-                ) : (
-                  <button onClick={() => openModal(offer.module)} className={`w-full px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
-                    {offer.cta}
-                  </button>
-                )}
+                <div className="mt-auto">
+                  {offer.external ? (
+                    <a href={offer.href} target="_blank" rel="noopener noreferrer" className={`block text-center px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
+                      {offer.cta}
+                    </a>
+                  ) : offer.href ? (
+                    <Link href={offer.href} className={`block text-center px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
+                      {offer.cta}
+                    </Link>
+                  ) : (
+                    <button onClick={() => openModal(offer.module)} className={`w-full px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
+                      {offer.cta}
+                    </button>
+                  )}
+                  {offer.note && (
+                    <p className="text-xs text-siddhi-black/55 text-center mt-3">{offer.note}</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
