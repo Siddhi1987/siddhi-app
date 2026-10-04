@@ -1,528 +1,338 @@
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import Head from 'next/head';
+import Link from 'next/link';
 
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mkoyyrbz';
+/* ──────────────────────────────────────────────────────────────────────────
+   CONFIG — fill these before deploy. The page is AUTH-FREE and does NOT import
+   Supabase: the database can stay paused and nothing here breaks.
+   ────────────────────────────────────────────────────────────────────────── */
+const WHATSAPP_NUMBER = '919356785897';             // SiddhiAI brand WhatsApp (dedicated dongle number)
+const WHATSAPP_MSG =
+  'Hi, I want my free Career Signal Audit. The role I am targeting is: ';
+const TALLY_URL = 'https://tally.so/r/XXXXXX';       // resume-upload + voice-link form (secondary)
+const RAZORPAY_4999_LINK = 'https://rzp.io/rzp/yV8AaGDo'; // ₹4,999 Razorpay Payment Link (direct buy)
+const OFFER_DEADLINE = '2026-10-11T23:59:59+05:30';  // 7-day founding window (IST)
+const SEATS = 10;
+
+const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MSG)}`;
+
+const FOUNDING_STACK = [
+  'Enterprise ATS Resume Rewrite & Match Score',
+  'AI Voice / Pitch Diagnostic Report',
+  'Live 45-min 1:1 Grilling & Strategy Session with a 14-yr HR Head',
+  'The HR "Blackbox" Debrief & 30-Day Placement Roadmap',
+  'Ancient Governance / Persuasion Framework Integration',
+];
+
+const pains = [
+  'You apply to 40 roles and hear nothing — the ATS bins you before a human ever sees your experience.',
+  'In the interview you know you are capable, but your answers wander and the panel drifts.',
+  'You get "we went with someone more aligned" — and nobody tells you what to actually fix.',
+  'You are worth more than your last CTC, but you have no frame to anchor the negotiation.',
+];
+
+function useCountdown(deadline) {
+  const [left, setLeft] = useState(null);
+  useEffect(() => {
+    const target = new Date(deadline).getTime();
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) { setLeft({ d: 0, h: 0, m: 0, over: true }); return; }
+      setLeft({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        over: false,
+      });
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [deadline]);
+  return left;
+}
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
-  const [authed, setAuthed] = useState(false);
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
-    let active = true;
-    supabase.auth.getUser().then(({ data }) => { if (active) setAuthed(Boolean(data?.user)); });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setAuthed(Boolean(session?.user));
-    });
-    return () => { active = false; sub?.subscription?.unsubscribe?.(); };
-  }, []);
-  const handleLogout = async () => {
-    if (supabase) { try { await supabase.auth.signOut(); } catch (e) {} }
-    setAuthed(false);
-  };
-  const [modalModule, setModalModule] = useState(null);
-  const [modalEmail, setModalEmail] = useState('');
-  const [modalName, setModalName] = useState('');
-  const [modalSubmitting, setModalSubmitting] = useState(false);
-  const [modalSuccess, setModalSuccess] = useState(false);
-  const [openProof, setOpenProof] = useState(null);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
-
-  const openModal = (moduleName) => {
-    setModalModule(moduleName);
-    setModalEmail('');
-    setModalName('');
-    setModalSuccess(false);
-  };
-
-  const closeModal = () => {
-    setModalModule(null);
-    setModalSuccess(false);
-  };
-
-  const submitEarlyAccess = async (e) => {
-    e.preventDefault();
-    if (!modalEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(modalEmail)) {
-      alert('Please enter a valid email.');
-      return;
-    }
-    setModalSubmitting(true);
-
-    try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name: modalName || 'Anonymous',
-          email: modalEmail,
-          module_interest: modalModule,
-          source: 'Early Access Signup',
-          submitted_at: new Date().toISOString(),
-          _subject: `Early Access: ${modalModule} - ${modalName || modalEmail}`,
-        }),
-      });
-
-      if (response.ok) {
-        setModalSuccess(true);
-      } else {
-        alert('Something went wrong. Please email support@siddhiai.in');
-      }
-    } catch (err) {
-      alert('Network error. Please try again.');
-    } finally {
-      setModalSubmitting(false);
-    }
-  };
-
-  const proofCards = [
-    {
-      title: 'Built by HR experience',
-      detail: 'Designed using real HR screening patterns, hiring evaluations, and communication feedback logic.',
-    },
-    {
-      title: 'Role-specific interview practice',
-      detail: 'Practice tailored interviews for HR, Sales, Engineering, Marketing, Product, and more.',
-    },
-    {
-      title: 'Free start, premium upgrade',
-      detail: 'Start free. Upgrade for unlimited practice, deeper analytics, and premium HR-style feedback.',
-    },
-  ];
-
-  const features = [
-    {
-      emoji: '🎯',
-      title: 'AI Interview Coach',
-      desc: 'Practice role-specific interview answers and get instant feedback on clarity, structure, confidence, and relevance.',
-      live: true,
-      href: '/start',
-    },
-    {
-      emoji: '🧑‍💼',
-      title: 'Real HR Mock Interview',
-      desc: 'Premium 1:1 interview simulation with real HR-style feedback, pressure testing, and improvement actions.',
-      live: false,
-      module: 'Real HR Interview',
-    },
-    {
-      emoji: '📄',
-      title: 'Deep Interview Report',
-      desc: 'A detailed performance report covering strengths, weak answers, communication gaps, and next practice plan.',
-      live: false,
-      module: 'Deep Interview Report',
-    },
-    {
-      emoji: '🤝',
-      title: 'Salary Negotiation',
-      desc: 'Practice difficult conversations and salary discussions with structured, ethical negotiation coaching.',
-      live: false,
-      module: 'Negotiate',
-    },
-  ];
-
-  const offers = [
-    {
-      name: 'AI Interview Practice',
-      price: '₹499',
-      tag: 'Fast start',
-      desc: 'For students and professionals who want quick practice before interviews.',
-      items: ['Role-specific AI mock interview', 'Instant communication feedback', 'Clarity and structure scoring', '3-question focused session'],
-      cta: 'Start AI Practice',
-      href: '/start',
-      primary: false,
-    },
-    {
-      name: 'Deep Interview Analysis',
-      price: '₹1,499',
-      tag: 'Best for serious candidates',
-      desc: 'For job seekers who want a deeper diagnosis before important interviews.',
-      items: ['AI interview simulation', 'Detailed improvement report', 'Answer quality analysis', 'Personal practice roadmap'],
-      cta: 'Join Priority List',
-      module: 'Deep Interview Analysis',
-      primary: false,
-    },
-    {
-      name: 'Real HR Interview Intensive',
-      price: '₹3,499',
-      value: '₹5,997',
-      save: 'You save ₹2,498 · 42% off',
-      tag: 'Complete 1:1 bundle',
-      desc: 'Walk into your real interview fully prepared: AI practice, a deep report, and a live 1:1 with a real HR.',
-      items: ['AI mock interview + instant scoring (worth ₹499)', 'Deep AI performance report + action plan (worth ₹1,499)', 'Live 60-min 1:1 HR interview on Google Meet (worth ₹3,999)', 'Personal improvement roadmap after your session'],
-      cta: 'Pay ₹3,499 → Book your slot',
-      href: 'https://rzp.io/rzp/puqldo8',
-      external: true,
-      note: 'After payment, we email you within 24 hours to book your weekend slot (Sat / Sun) and send your Google Meet invite.',
-      primary: true,
-    },
-  ];
+  const left = useCountdown(OFFER_DEADLINE);
 
   return (
     <div className="min-h-screen bg-siddhi-ivory text-siddhi-black overflow-x-hidden">
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-siddhi-ivory/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
-          <div className="flex items-baseline gap-1 sm:gap-2 min-w-0">
-            <span className="font-display text-2xl sm:text-3xl font-bold text-siddhi-saffron tracking-tight">SIDDHI</span>
-            <span className="font-sanskrit text-xs sm:text-sm text-siddhi-gold">सिद्धि</span>
+      <Head>
+        <title>SIDDHI — ATS & Interview Diagnostic for Experienced Switchers</title>
+        <meta
+          name="description"
+          content="Stop getting auto-rejected. A senior HR advisor + AI diagnose exactly why your resume and interview answers fail — and rebuild them. Founding price ₹4,999."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
+      {/* NAV */}
+      <nav className="fixed top-0 inset-x-0 z-50 bg-siddhi-ivory/90 backdrop-blur-md shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-2xl font-bold text-siddhi-saffron tracking-tight">SIDDHI</span>
+            <span className="font-sanskrit text-xs text-siddhi-gold">सिद्धि</span>
           </div>
-          <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
-            <a href="#offers" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Pricing</a>
-            <a href="#hr" className="hidden md:inline text-sm font-medium hover:text-siddhi-saffron transition">Real HR</a>
-            {authed ? (
-              <>
-                <Link href="/dashboard" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
-                  Dashboard
-                </Link>
-                <button onClick={handleLogout} className="text-xs sm:text-sm font-medium text-siddhi-black/60 hover:text-siddhi-saffron transition whitespace-nowrap">
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="hidden sm:inline text-sm font-medium hover:text-siddhi-saffron transition">Login</Link>
-                <Link href="/start" className="px-3 sm:px-5 py-2 bg-siddhi-saffron text-white text-xs sm:text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap">
-                  Start Free Check
-                </Link>
-              </>
-            )}
-          </div>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-siddhi-saffron text-white text-sm font-semibold rounded-md hover:bg-siddhi-gold transition shadow-sm whitespace-nowrap"
+          >
+            Free Career Signal Audit →
+          </a>
         </div>
       </nav>
 
-      <section className="pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-block mb-6 px-4 py-1.5 border border-siddhi-gold/40 rounded-full bg-white/50">
-            <span className="font-sanskrit text-siddhi-gold text-lg">वाक् सिद्धि</span>
-            <span className="mx-2 text-siddhi-gold/40">·</span>
-            <span className="text-xs uppercase tracking-widest text-siddhi-black/60">Mastery of Speech</span>
+      {/* HERO */}
+      <section className="pt-28 sm:pt-32 pb-14 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-block mb-5 px-4 py-1.5 border border-siddhi-gold/40 rounded-full bg-white/60">
+            <span className="text-xs uppercase tracking-widest text-siddhi-black/70">For switchers with 3–10 years' experience</span>
           </div>
-
-          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-siddhi-black mb-6 leading-[1.1] md:leading-[1.05] break-words">
-            India’s First Communication AI
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-6">
+            Your experience isn't the problem.
             <br />
-            <span className="text-siddhi-saffron italic">Inspired by Vak Siddhi</span>
+            <span className="text-siddhi-saffron italic">The filter is.</span>
           </h1>
-
-          <p className="text-xl md:text-2xl text-siddhi-black/70 mb-3 font-light">Ancient Wisdom. Modern AI.</p>
-          <p className="text-base md:text-lg text-siddhi-black/60 max-w-2xl mx-auto mb-10">
-            SIDDHI helps students and professionals practice interview answers, understand weak areas, and build confidence before the real interview.
+          <p className="text-lg sm:text-xl text-siddhi-black/70 mb-4 font-light">
+            An AI + a senior HR/IR advisor diagnose exactly why your resume gets auto-rejected and why your interview answers lose the room — then rebuild both.
+          </p>
+          <p className="text-base text-siddhi-black/55 max-w-xl mx-auto mb-8">
+            Start with a free Career Signal Score. If it's sharp, upgrade to the full Founding Cohort remediation — ₹4,999.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 max-w-md sm:max-w-none mx-auto">
-            <Link href={authed ? '/interview' : '/start'} className="px-6 sm:px-8 py-3 sm:py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg shadow-siddhi-saffron/20 text-base sm:text-lg text-center">
-              {authed ? 'Go to Interview Practice' : 'Start Free Interview Check'}
-            </Link>
-            <button onClick={() => openModal('Real HR Mock Interview')} className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-base sm:text-lg text-center">
-              Request Real HR Interview
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto mb-5">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg text-lg text-center"
+            >
+              Get my free audit on WhatsApp →
+            </a>
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 border-2 border-siddhi-black text-siddhi-black font-semibold rounded-md hover:bg-siddhi-black hover:text-siddhi-ivory transition text-lg text-center"
+            >
+              Or send your resume on WhatsApp →
+            </a>
           </div>
+          <p className="text-xs text-siddhi-black/50">Free score in 24 hours · No account · No card</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-sm">
-            {proofCards.map((card, index) => {
-              const isOpen = openProof === index;
-              return (
-                <button
-                  key={card.title}
-                  type="button"
-                  onClick={() => setOpenProof(isOpen ? null : index)}
-                  className={`bg-white/70 border rounded-lg p-3 text-center transition hover:border-siddhi-saffron hover:shadow-md ${
-                    isOpen ? 'border-siddhi-saffron shadow-md' : 'border-siddhi-black/10'
-                  }`}
-                  aria-expanded={isOpen}
-                >
-                  <div className="font-medium">{card.title}</div>
-                  <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-28 mt-2 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="text-xs leading-relaxed text-siddhi-black/65">{card.detail}</p>
-                  </div>
-                  <div className="mt-1 text-xs text-siddhi-saffron font-semibold">{isOpen ? 'Tap to close' : 'Tap to know more'}</div>
-                </button>
-              );
-            })}
+          {/* SCARCITY */}
+          <div className="mt-8 inline-flex flex-col items-center gap-1 px-6 py-3 rounded-lg bg-siddhi-black text-siddhi-ivory">
+            <span className="text-sm font-semibold text-siddhi-gold">Only {SEATS} founding seats at ₹4,999</span>
+            {left && !left.over && (
+              <span className="text-xs text-siddhi-ivory/70">
+                Founding price closes in {left.d}d {left.h}h {left.m}m
+              </span>
+            )}
+            {left && left.over && (
+              <span className="text-xs text-siddhi-ivory/70">Founding window closed — join the next cohort</span>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">
-              Simple Process
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              How SIDDHI Works
-            </h2>
-            <p className="text-siddhi-black/60 max-w-2xl mx-auto">
-              Simple AI interview practice designed for clarity, confidence, and hiring readiness.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-4 gap-4">
-            {[
-              ['Choose your path', 'Student, fresher, placement candidate, or experienced professional.'],
-              ['Create readiness profile', 'Share your target role, confidence level, and biggest interview challenge.'],
-              ['Practice with AI', 'Answer focused interview questions and get instant communication feedback.'],
-              ['Unlock improvement', 'Use the preview to decide if 30-day access or HR guidance is right for you.'],
-            ].map(([title, description], index) => (
-              <div key={title} className="bg-white border border-siddhi-black/10 rounded-2xl p-5 shadow-sm">
-                <div className="w-9 h-9 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold mb-4">
-                  {index + 1}
-                </div>
-                <h3 className="font-display text-xl font-bold mb-2">{title}</h3>
-                <p className="text-sm text-siddhi-black/60">{description}</p>
+      {/* PAIN / SPECIFICITY */}
+      <section className="py-14 px-4 sm:px-6 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-8 text-center">
+            If you're switching, you already feel this:
+          </h2>
+          <div className="space-y-4">
+            {pains.map((p) => (
+              <div key={p} className="flex gap-3 items-start bg-siddhi-ivory/60 border border-siddhi-black/10 rounded-lg p-4">
+                <span className="text-siddhi-saffron font-bold text-lg leading-6">✗</span>
+                <p className="text-siddhi-black/80">{p}</p>
               </div>
             ))}
           </div>
+          <p className="text-center text-lg font-semibold mt-8">
+            The gap isn't your competence. It's your <span className="text-siddhi-saffron">signal</span> — and signal is fixable.
+          </p>
         </div>
       </section>
 
-      <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Focused for 60 days</p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Only interview communication. Nothing else.</h2>
-            <p className="text-siddhi-black/60 max-w-2xl mx-auto">
-              SIDDHI is not a generic advice AI. For now, it is a focused interview communication platform for serious candidates.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f) => {
-              const cardClasses = `p-6 rounded-lg border-2 transition text-left w-full ${
-                f.live
-                  ? 'border-siddhi-saffron bg-siddhi-ivory hover:shadow-lg hover:scale-[1.02]'
-                  : 'border-siddhi-black/10 bg-siddhi-ivory/50 hover:border-siddhi-saffron/50 hover:shadow-md'
-              }`;
-
-              const cardContent = (
-                <>
-                  <div className="text-4xl mb-4">{f.emoji}</div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-display text-xl font-bold">{f.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${f.live ? 'bg-siddhi-saffron text-white' : 'bg-siddhi-black/10 text-siddhi-black/60'}`}>
-                      {f.live ? 'LIVE' : 'PRIORITY'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-siddhi-black/70 mb-3">{f.desc}</p>
-                  <div className="text-xs font-semibold text-siddhi-saffron">
-                    {f.live ? 'Start interview →' : 'Join priority list →'}
-                  </div>
-                </>
-              );
-
-              return f.live ? (
-                <Link key={f.title} href={f.href} className={cardClasses}>
-                  {cardContent}
-                </Link>
-              ) : (
-                <button key={f.title} type="button" onClick={() => openModal(f.module)} className={cardClasses}>
-                  {cardContent}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Live Product Preview</p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Experience a SIDDHI Interview</h2>
-            <p className="text-siddhi-black/60 max-w-2xl mx-auto">See how SIDDHI turns interview answers into clear, HR-style communication feedback.</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 items-stretch">
-            <div className="bg-siddhi-ivory border border-siddhi-black/10 rounded-2xl p-6 sm:p-8 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold">AI</div>
-                <div>
-                  <div className="font-semibold">SIDDHI Interviewer</div>
-                  <div className="text-xs text-siddhi-black/50">Role-specific mock interview</div>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl p-5 border border-siddhi-black/10 mb-5">
-                <p className="text-lg font-semibold text-siddhi-black">“Tell me about yourself.”</p>
-              </div>
-              <div className="bg-white/70 rounded-xl p-5 border border-siddhi-black/10">
-                <p className="text-sm text-siddhi-black/60 mb-2">Candidate answer sample</p>
-                <p className="text-siddhi-black/75">
-                  I am a final-year student with strong interest in people operations and communication.
-                  I have worked on college hiring projects and want to improve how I structure my answers.
-                </p>
-              </div>
-              <div className="mt-5 text-sm text-siddhi-saffron font-semibold">AI is analyzing clarity, structure, and confidence...</div>
-            </div>
-            <div className="bg-siddhi-black text-siddhi-ivory rounded-2xl p-6 sm:p-8 shadow-xl">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-widest text-siddhi-gold font-semibold mb-2">HR-style Feedback</p>
-                <h3 className="font-display text-3xl font-bold">Communication Scorecard</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Confidence</div><div className="text-3xl font-bold text-siddhi-saffron">82%</div></div>
-                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Clarity</div><div className="text-3xl font-bold text-siddhi-saffron">Strong</div></div>
-                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Structure</div><div className="text-xl font-bold">Needs work</div></div>
-                <div className="bg-white/10 rounded-xl p-4"><div className="text-xs text-siddhi-ivory/60 mb-1">Filler words</div><div className="text-3xl font-bold">3</div></div>
-              </div>
-              <div className="bg-white/10 rounded-xl p-5">
-                <h4 className="font-semibold mb-2 text-siddhi-gold">Improvement action</h4>
-                <p className="text-sm text-siddhi-ivory/75">Add one measurable example and follow a simple structure: Situation → Action → Result.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="hr" className="py-12 sm:py-20 px-4 sm:px-6 bg-siddhi-ivory">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Real HR Layer</p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">AI practice is the start. Real HR feedback is the premium edge.</h2>
-            <div className="space-y-4 text-siddhi-black/75">
-              <p>SIDDHI combines scalable AI interview practice with human HR-style judgment for candidates preparing for important opportunities.</p>
-              <p>The goal is simple: better answers, better structure, stronger confidence, and clearer interview communication.</p>
-              <p className="font-semibold text-siddhi-black">This is hiring confidence optimization, not generic life advice.</p>
-            </div>
-          </div>
-          <div className="rounded-2xl bg-white border-2 border-siddhi-saffron/30 p-6 sm:p-8 shadow-xl">
-            <h3 className="font-display text-2xl font-bold mb-4">What candidates get</h3>
-            <ul className="space-y-3 text-sm text-siddhi-black/75">
-              <li>✓ Role-specific AI interview simulation</li>
-              <li>✓ Communication score across clarity, confidence, and structure</li>
-              <li>✓ Real HR-style interview slot for premium users</li>
-              <li>✓ Detailed improvement report and next-practice plan</li>
-              <li>✓ Focus on Indian hiring context and professional expectations</li>
-            </ul>
-            <button onClick={() => openModal('Real HR Mock Interview')} className="mt-8 w-full px-6 py-3 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg">
-              Request HR Mock Interview →
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section id="offers" className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Interview Offers</p>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Simple pricing for the first growth sprint.</h2>
-            <p className="text-siddhi-black/60 max-w-2xl mx-auto">Start with AI. Upgrade when the interview is serious.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {offers.map((offer) => (
-              <div key={offer.name} className={`p-7 rounded-lg border-2 relative flex flex-col ${offer.primary ? 'border-siddhi-saffron bg-gradient-to-br from-siddhi-ivory to-white shadow-xl' : 'border-siddhi-black/10 bg-siddhi-ivory/40'}`}>
-                {offer.primary && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-siddhi-saffron text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">MOST POPULAR</div>
-                )}
-                <div className="text-xs uppercase tracking-wider font-bold text-siddhi-saffron mb-3">{offer.tag}</div>
-                <h3 className="font-display text-2xl font-bold mb-2">{offer.name}</h3>
-                <p className="text-sm text-siddhi-black/60 mb-5 min-h-[48px]">{offer.desc}</p>
-                <div className="mb-6">
-                  {offer.value && (
-                    <div className="text-sm text-siddhi-black/45 mb-1">
-                      <span className="line-through">{offer.value}</span> <span className="text-siddhi-black/60">if bought separately</span>
-                    </div>
-                  )}
-                  <div className="text-4xl font-bold text-siddhi-saffron">{offer.price}</div>
-                  {offer.save && (
-                    <div className="inline-block mt-2 text-xs font-bold text-green-800 bg-green-100 px-2 py-0.5 rounded-full">{offer.save}</div>
-                  )}
-                </div>
-                <ul className="space-y-3 mb-8 text-sm text-siddhi-black/75">
-                  {offer.items.map((item) => <li key={item}>✓ {item}</li>)}
-                </ul>
-                <div className="mt-auto">
-                  {offer.external ? (
-                    <a href={offer.href} target="_blank" rel="noopener noreferrer" className={`block text-center px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
-                      {offer.cta}
-                    </a>
-                  ) : offer.href ? (
-                    <Link href={offer.href} className={`block text-center px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
-                      {offer.cta}
-                    </Link>
-                  ) : (
-                    <button onClick={() => openModal(offer.module)} className={`w-full px-6 py-3 font-semibold rounded-md transition ${offer.primary ? 'bg-siddhi-saffron text-white hover:bg-siddhi-gold' : 'border-2 border-siddhi-black text-siddhi-black hover:bg-siddhi-black hover:text-white'}`}>
-                      {offer.cta}
-                    </button>
-                  )}
-                  {offer.note && (
-                    <p className="text-xs text-siddhi-black/55 text-center mt-3">{offer.note}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory">
+      {/* THE FREE HOOK */}
+      <section className="py-14 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="font-sanskrit text-3xl text-siddhi-gold mb-4">वाक् सिद्धि</div>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Prepare before the interview prepares you.</h2>
-          <p className="text-lg text-siddhi-ivory/70 mb-10">Use AI practice first. Upgrade to human HR feedback when the opportunity matters.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/start" className="inline-block px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-2xl text-lg">Start Free Interview Check</Link>
-            <button onClick={() => openModal('Real HR Mock Interview')} className="inline-block px-8 py-4 border-2 border-siddhi-ivory text-siddhi-ivory font-semibold rounded-md hover:bg-siddhi-ivory hover:text-siddhi-black transition text-lg">Request HR Slot</button>
+          <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Start free</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Your Career Signal Score</h2>
+          <p className="text-siddhi-black/65 max-w-xl mx-auto mb-8">
+            Send your resume and a 3-minute voice pitch. In 24 hours you get a scored diagnostic — ATS score, interview-voice score, and the single biggest reason you're being filtered out. Free.
+          </p>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-8 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg text-lg"
+          >
+            Claim my free Career Signal Score →
+          </a>
+        </div>
+      </section>
+
+      {/* FOUNDING COHORT — the ₹4,999 card (₹35,000 struck → ₹4,999, direct pay) */}
+      <section id="offer" className="py-14 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory">
+        <div className="max-w-xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-sm uppercase tracking-widest text-siddhi-gold font-semibold mb-3">The full remediation</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">Founding Cohort</h2>
+            <p className="text-siddhi-ivory/60 max-w-md mx-auto">
+              The free score tells you what's broken. This fixes it — resume, interview narrative, and negotiation, with a senior human who has sat on the hiring side.
+            </p>
+          </div>
+
+          <div className="relative p-8 rounded-2xl border-2 border-siddhi-saffron bg-white text-siddhi-black shadow-2xl">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-siddhi-saffron text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+              FOUNDING COHORT · {SEATS} SEATS
+            </div>
+
+            <div className="text-xs uppercase tracking-wider font-bold text-siddhi-saffron mb-4 text-center">
+              ATS & Voice Diagnostic + Remediation
+            </div>
+
+            {/* Price */}
+            <div className="text-center mb-6">
+              <div className="text-base text-siddhi-black/45">
+                <span className="line-through">₹35,000</span>{' '}
+                <span className="text-siddhi-black/60 text-sm">value</span>
+              </div>
+              <div className="text-5xl font-bold text-siddhi-saffron leading-tight">₹4,999</div>
+              <div className="inline-block mt-2 text-xs font-bold text-green-800 bg-green-100 px-3 py-0.5 rounded-full">
+                Founding offer · 7-day window
+              </div>
+            </div>
+
+            {/* Value stack */}
+            <ul className="space-y-3 mb-8 text-sm text-siddhi-black/80">
+              {FOUNDING_STACK.map((item) => (
+                <li key={item} className="flex gap-2 items-start">
+                  <span className="text-siddhi-saffron font-bold leading-5">✓</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href={RAZORPAY_4999_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center w-full px-6 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-lg text-lg"
+            >
+              Pay ₹4,999 → Book your slot
+            </a>
+            <p className="text-xs text-siddhi-black/55 text-center mt-3">
+              After payment you'll get your booking link + Google Meet invite within 24 hours. Weekend slots only (Sat & Sun).
+            </p>
+          </div>
+
+          <p className="text-center text-sm text-siddhi-ivory/60 mt-6 max-w-md mx-auto">
+            Not ready to commit? <a href={waLink} target="_blank" rel="noopener noreferrer" className="text-siddhi-gold underline">Get the free Career Signal Score first →</a>
+          </p>
+        </div>
+      </section>
+
+      {/* GUARANTEE */}
+      <section className="py-14 px-4 sm:px-6 bg-white">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="font-sanskrit text-2xl text-siddhi-gold mb-3">अभयम्</div>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">The zero-risk guarantee</h2>
+          <p className="text-siddhi-black/75 text-lg leading-relaxed">
+            Show up to the 45-minute call having sent your resume and pitch. If you leave without a sharper, recruiter-proof narrative you can use in your very next application — tell me on the call and I refund the full ₹4,999. No forms, no argument. I only keep your money if you walk away with something that changes how you'll apply tomorrow.
+          </p>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-14 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10 text-center">How it works</h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {[
+              ['1', 'Send your signals', 'Message on WhatsApp with your resume + a 3-min voice pitch. Two minutes of effort.'],
+              ['2', 'Get your free score', 'In 24 hours, a scored diagnostic + your single biggest leak. Decide if the full fix is worth it.'],
+              ['3', 'Rebuild on the call', '45-min 1:1 with a senior advisor: resume, interview narrative, and negotiation — rebuilt live.'],
+            ].map(([n, t, d]) => (
+              <div key={n} className="bg-white border border-siddhi-black/10 rounded-2xl p-6 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-siddhi-saffron text-white flex items-center justify-center font-bold mb-4">{n}</div>
+                <h3 className="font-display text-lg font-bold mb-2">{t}</h3>
+                <p className="text-sm text-siddhi-black/60">{d}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className="py-8 sm:py-10 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory/60 border-t border-siddhi-ivory/10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+      {/* WHO IT'S FOR */}
+      <section className="py-14 px-4 sm:px-6 bg-siddhi-ivory">
+        <div className="max-w-3xl mx-auto grid sm:grid-cols-2 gap-6">
+          <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6">
+            <h3 className="font-display text-xl font-bold mb-4 text-siddhi-saffron">This is for you if…</h3>
+            <ul className="space-y-2 text-sm text-siddhi-black/75">
+              <li>✓ You have 3–10 years' experience and are actively switching</li>
+              <li>✓ You're getting silence or late-stage rejections</li>
+              <li>✓ You're serious enough to do a 3-minute pitch and show up</li>
+            </ul>
+          </div>
+          <div className="bg-white border border-siddhi-black/10 rounded-2xl p-6">
+            <h3 className="font-display text-xl font-bold mb-4 text-siddhi-black/50">This is not for you if…</h3>
+            <ul className="space-y-2 text-sm text-siddhi-black/60">
+              <li>✗ You're a fresher with no work experience yet</li>
+              <li>✗ You want a resume typed for you, not a career signal rebuilt</li>
+              <li>✗ You won't put in the 2 minutes to send your pitch</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* CREDIBILITY */}
+      <section className="py-14 px-4 sm:px-6 bg-white">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="text-sm uppercase tracking-widest text-siddhi-saffron font-semibold mb-3">Who grades you</p>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold mb-4">A senior HR/IR advisor — not a bot</h2>
+          <p className="text-siddhi-black/70 leading-relaxed">
+            Your audit and call are led by a senior HR/IR leader with 14+ years across manufacturing, industrial and defence — the rooms where one unclear sentence costs a plant shutdown or a union standoff. SiddhiAI's scoring does the data; the human does the judgment. You get the recruiter's-eye view most candidates never hear.
+          </p>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-16 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="font-sanskrit text-3xl text-siddhi-gold mb-4">वाक् सिद्धि</div>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-5">Stop guessing why you're getting filtered out.</h2>
+          <p className="text-siddhi-ivory/70 mb-8">Get the free score first. {left && !left.over ? `Founding price closes in ${left.d}d ${left.h}h.` : 'Join the next founding cohort.'}</p>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-10 py-4 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition shadow-2xl text-lg"
+          >
+            Get my free Career Signal Audit →
+          </a>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-8 px-4 sm:px-6 bg-siddhi-black text-siddhi-ivory/60 border-t border-siddhi-ivory/10">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
           <div className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-bold text-siddhi-saffron">SIDDHI</span>
+            <span className="font-display text-xl font-bold text-siddhi-saffron">SIDDHI</span>
             <span className="font-sanskrit text-siddhi-gold">सिद्धि</span>
           </div>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-siddhi-saffron transition">Privacy</Link>
             <Link href="/terms" className="hover:text-siddhi-saffron transition">Terms</Link>
-            <Link href="/feedback" className="hover:text-siddhi-saffron transition">Feedback</Link>
-            <a href="mailto:support@siddhiai.in" className="hover:text-siddhi-saffron transition">Contact</a>
+            <a href="mailto:hello@siddhiai.in" className="hover:text-siddhi-saffron transition">Contact</a>
           </div>
           <div className="text-xs">© 2026 SIDDHI · Ancient Wisdom. Modern AI.</div>
         </div>
       </footer>
-
-      {modalModule && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeModal}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={closeModal} className="absolute top-4 right-4 text-siddhi-black/40 hover:text-siddhi-black text-2xl leading-none" aria-label="Close">×</button>
-            {!modalSuccess ? (
-              <>
-                <div className="text-center mb-6">
-                  <div className="text-5xl mb-3">🧑‍💼</div>
-                  <span className="inline-block text-xs px-2 py-0.5 bg-siddhi-gold/20 text-siddhi-gold rounded-full font-semibold mb-3 uppercase tracking-wider">Priority Access</span>
-                  <h3 className="font-display text-2xl font-bold mb-2">{modalModule}</h3>
-                  <p className="text-sm text-siddhi-black/60">Leave your email. We will contact early users first for premium interview feedback slots and launch updates.</p>
-                </div>
-                <form onSubmit={submitEarlyAccess} className="space-y-3">
-                  <input type="text" value={modalName} onChange={(e) => setModalName(e.target.value)} placeholder="Your name" className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
-                  <input type="email" value={modalEmail} onChange={(e) => setModalEmail(e.target.value)} placeholder="your@email.com" required className="w-full p-3 border-2 border-siddhi-black/15 rounded-lg focus:border-siddhi-saffron focus:outline-none" />
-                  <button type="submit" disabled={modalSubmitting} className="w-full px-6 py-3 bg-siddhi-saffron text-white font-bold rounded-md hover:bg-siddhi-gold transition disabled:opacity-60">
-                    {modalSubmitting ? 'Submitting…' : 'Join Priority List →'}
-                  </button>
-                </form>
-                <p className="text-xs text-siddhi-black/50 text-center mt-4">No spam. We use this only for SIDDHI interview updates.</p>
-              </>
-            ) : (
-              <div className="text-center py-4">
-                <div className="text-5xl mb-4">🙏</div>
-                <h3 className="font-display text-2xl font-bold mb-2">You are on the priority list.</h3>
-                <p className="text-sm text-siddhi-black/60 mb-6">We will contact you when premium interview slots open.</p>
-                <button onClick={closeModal} className="px-6 py-3 bg-siddhi-saffron text-white font-semibold rounded-md hover:bg-siddhi-gold transition">Continue</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
