@@ -77,6 +77,13 @@ async function callModel({ model, key, system, user }) {
 }
 
 export default async function handler(req, res) {
+  // AI coach kill switch. Set to true (or delete this block) to re-enable the OpenRouter call.
+  // While false, this route never calls OpenRouter and spends nothing; the mock falls back to built-in rule-based feedback.
+  const AI_ANALYZE_ENABLED = false;
+  if (!AI_ANALYZE_ENABLED) {
+    return res.status(503).json({ error: 'ai_disabled', message: 'AI coach temporarily disabled' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
