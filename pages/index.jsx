@@ -297,7 +297,7 @@ export default function Home() {
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-siddhi-saffron transition">Privacy</Link>
             <Link href="/terms" className="hover:text-siddhi-saffron transition">Terms</Link>
-            <a href="mailto:hello@siddhiai.in" className="hover:text-siddhi-saffron transition">Contact</a>
+            <a href="https://wa.me/919356785897?text=Hi%2C%20I%20have%20a%20question%20about%20SiddhiAI." className="hover:text-siddhi-saffron transition">Contact</a>
           </div>
           <div className="text-xs">Copyright 2026 SIDDHI. Ancient Wisdom. Modern AI.</div>
         </div>
